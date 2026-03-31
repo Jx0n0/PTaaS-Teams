@@ -1,0 +1,45 @@
+body {
+  margin: 0;
+  background: #f4f7fb;
+  font-family: Inter, PingFang SC, Microsoft YaHei, sans-serif;
+}
+
+.logo {
+  height: 48px;
+  margin: 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1677ff, #69b1ff);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.header {
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.content {
+  margin: 20px;
+}
+
+.login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at top left, #d6e4ff, #f0f5ff);
+}
+
+.login-card {
+  width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
