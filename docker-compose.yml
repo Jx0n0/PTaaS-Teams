@@ -9,10 +9,15 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ptaas -d ptaas"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
 
   web:
     build: .
-    command: bash -c "python manage.py migrate && python manage.py seed_initial_data && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python scripts_wait_for_db.py && python manage.py migrate && python manage.py seed_initial_data && python manage.py runserver 0.0.0.0:8000"
     volumes:
       - .:/app
     ports:
@@ -26,7 +31,8 @@ services:
       DJANGO_DEBUG: 1
       DJANGO_SECRET_KEY: dev-secret-key
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
 volumes:
   postgres_data:
