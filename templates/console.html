@@ -11,12 +11,60 @@
   <div class="shell">
     <aside class="sider">
       <div class="brand">PTaaS</div>
-      <button class="nav active" data-tab="dashboard">工作台</button>
+
+      <button class="nav active" data-tab="dashboard" data-title="Dashboard" data-implemented="1">Dashboard</button>
+
+      <div class="menu-title">client</div>
+      <button class="nav" data-tab="client_list" data-title="client / client List">client List</button>
+      <button class="nav" data-tab="client_detail" data-title="client / client Detail">client Detail</button>
+      <div class="menu-indent">
+        <button class="nav sub" data-tab="client_projects" data-title="client Detail / Projects">Projects</button>
+        <button class="nav sub" data-tab="client_report_templates" data-title="client Detail / Report Templates">Report Templates</button>
+        <button class="nav sub" data-tab="client_reports" data-title="client Detail / Reports">Reports</button>
+      </div>
+
+      <div class="menu-title">Projects</div>
+      <button class="nav" data-tab="project_list" data-title="Projects / Project List">Project List</button>
+      <button class="nav" data-tab="project_detail" data-title="Projects / Project Detail">Project Detail</button>
+      <div class="menu-indent">
+        <button class="nav sub" data-tab="asset_list_in_project" data-title="Project Detail / Asset List">Asset List</button>
+        <button class="nav sub" data-tab="asset_detail_in_project" data-title="Project Detail / Asset Detail">Asset Detail</button>
+        <div class="menu-indent">
+          <button class="nav sub" data-tab="batches" data-title="Asset Detail / Batches">Batches</button>
+          <button class="nav sub" data-tab="scan_files" data-title="Asset Detail / Scan Files">Scan Files</button>
+          <button class="nav sub" data-tab="findings_in_asset" data-title="Asset Detail / Findings">Findings</button>
+          <button class="nav sub" data-tab="history_findings" data-title="Asset Detail / History Findings">History Findings</button>
+        </div>
+      </div>
+
+      <div class="menu-title">Assets</div>
+      <button class="nav" data-tab="assets_list" data-title="Assets / Asset List">Asset List</button>
+
+      <div class="menu-title">Findings</div>
+      <button class="nav" data-tab="all_findings" data-title="Findings / All Findings">All Findings</button>
+      <button class="nav" data-tab="my_findings" data-title="Findings / My Findings">My Findings</button>
+      <button class="nav" data-tab="finding_detail" data-title="Findings / Finding Detail">Finding Detail</button>
+
+      <div class="menu-title">Templates</div>
+      <button class="nav" data-tab="vuln_database" data-title="Templates / Vulnerability database">Vulnerability database</button>
+      <button class="nav" data-tab="report_templates" data-title="Templates / Report Templates">Report Templates</button>
+
+      <div class="menu-title">Reports</div>
+      <button class="nav" data-tab="generate_report" data-title="Reports / Generate Report">Generate Report</button>
+      <button class="nav" data-tab="report_list" data-title="Reports / Report List">Report List</button>
+      <button class="nav" data-tab="report_detail" data-title="Reports / Report Detail">Report Detail</button>
+
+      <div class="menu-title">Workflow Center</div>
+      <button class="nav" data-tab="my_tasks" data-title="Workflow Center / My Tasks">My Tasks</button>
+      <button class="nav" data-tab="qa_queue" data-title="Workflow Center / QA Review Queue">QA Review Queue</button>
+      <button class="nav" data-tab="tester_tasks" data-title="Workflow Center / Tester Tasks">Tester Tasks</button>
+      <button class="nav" data-tab="pm_review" data-title="Workflow Center / PM Review">PM Review</button>
+
       <div class="menu-title">系统管理</div>
-      <button class="nav" data-tab="users">用户管理</button>
-      <button class="nav" data-tab="roles">角色管理</button>
-      <button class="nav" data-tab="bindings">角色绑定</button>
-      <button class="nav" data-tab="security">修改密码</button>
+      <button class="nav" data-tab="users" data-title="系统管理 / 用户管理" data-implemented="1">用户管理</button>
+      <button class="nav" data-tab="roles" data-title="系统管理 / 角色管理" data-implemented="1">角色管理</button>
+      <button class="nav" data-tab="security" data-title="系统管理 / 修改密码" data-implemented="1">修改密码</button>
+      <button class="nav" data-tab="audit_logs" data-title="系统管理 / Audit Logs">Audit Logs</button>
     </aside>
 
     <main class="main">
@@ -67,17 +115,6 @@
           <table><thead><tr><th>ID</th><th>编码</th><th>名称</th><th>描述</th></tr></thead><tbody id="rolesBody"></tbody></table>
         </div>
 
-        <div class="card hidden" id="bindingsTab">
-          <h3>用户角色绑定</h3>
-          <div class="row">
-            <select id="bindUser"></select>
-            <select id="bindRole"></select>
-            <select id="bindScope"><option>GLOBAL</option><option>CUSTOMER</option><option>PROJECT</option></select>
-            <button id="bindBtn" class="btn">创建绑定</button>
-          </div>
-          <table><thead><tr><th>ID</th><th>User</th><th>Role</th><th>Scope</th></tr></thead><tbody id="bindingsBody"></tbody></table>
-        </div>
-
         <div class="card hidden" id="securityTab">
           <h3>修改密码</h3>
           <div class="row">
@@ -86,6 +123,11 @@
             <input id="newPwd2" type="password" placeholder="确认新密码" />
             <button id="pwdBtn" class="btn">修改密码</button>
           </div>
+        </div>
+
+        <div class="card hidden" id="placeholderTab">
+          <h3 id="placeholderTitle">功能待开发</h3>
+          <p>该功能已预留导航入口，后续阶段逐步实现。</p>
         </div>
       </section>
     </main>
