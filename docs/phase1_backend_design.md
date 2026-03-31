@@ -1,18 +1,15 @@
 # Phase 1 Backend Design (Django/DRF)
 
 ## Scope for current stage
-Current stage focuses on platform infrastructure only:
+Current stage focuses on platform infrastructure APIs (not relying on Django admin UI workflows):
 - Login authentication
-- User management
-- Role management
-- User-role binding
+- User management (API)
+- Role management (API)
+- User-role binding (API)
 - Basic permission boundary
 - Password change
 - Built-in admin account (dev seed)
 - Base user info API
-- Django admin support
-
-Business tree entities (`Customer/Project/Asset/Batch`) remain as extension-ready placeholders only.
 
 ## Auth APIs (`/api/v1/auth/*`)
 - `POST /api/v1/auth/login`
@@ -31,6 +28,13 @@ Business tree entities (`Customer/Project/Asset/Batch`) remain as extension-read
 - confirm new password twice
 - use Django default password hash + validators
 - increment `token_version` for future forced relogin mechanism
+
+## Management APIs (`/api/v1/*`)
+- `/users/`
+- `/roles/`
+- `/user-roles/`
+
+These APIs are protected by platform-admin permission through API tokens, so admin capabilities are available via backend APIs directly.
 
 ## Seed Strategy
 Command: `python manage.py seed_initial_data`
