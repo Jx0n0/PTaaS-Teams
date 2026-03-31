@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTaaS Teams Console</title>
+  <style>
+    body{margin:0;font-family:Inter,Arial;background:#f5f7fb}.top{height:56px;background:#001529;color:#fff;display:flex;align-items:center;padding:0 20px}.wrap{padding:16px}.card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06);margin-bottom:16px}input,select,button{padding:8px 10px;border:1px solid #d9d9d9;border-radius:8px}button{background:#1677ff;color:#fff;border:none;cursor:pointer}.row{display:flex;gap:8px;flex-wrap:wrap}.hidden{display:none}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #f0f0f0;padding:8px;text-align:left}
+  </style>
+</head>
+<body>
+  <div class="top">PTaaS Teams 控制台（无 Node 构建版）</div>
+  <div class="wrap">
+    <div id="loginCard" class="card">
+      <h3>登录</h3>
+      <div class="row">
+        <input id="username" placeholder="用户名" />
+        <input id="password" type="password" placeholder="密码" />
+        <button onclick="doLogin()">登录</button>
+      </div>
+      <p id="loginMsg"></p>
+    </div>
+
+    <div id="app" class="hidden">
+      <div class="card">
+        <div class="row">
+          <button onclick="loadMe()">我的信息</button>
+          <button onclick="loadUsers()">用户管理</button>
+          <button onclick="loadRoles()">角色管理</button>
+          <button onclick="loadUserRoles()">用户角色绑定</button>
+          <button onclick="changePwd()">修改密码</button>
+          <button onclick="logout()">退出</button>
+        </div>
+      </div>
+
+      <div class="card"><pre id="meOut">未加载</pre></div>
+      <div class="card"><table><thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th></tr></thead><tbody id="usersBody"></tbody></table></div>
+      <div class="card"><table><thead><tr><th>ID</th><th>Code</th><th>Name</th></tr></thead><tbody id="rolesBody"></tbody></table></div>
+      <div class="card"><table><thead><tr><th>ID</th><th>User</th><th>Role</th><th>Scope</th></tr></thead><tbody id="userRolesBody"></tbody></table></div>
+    </div>
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
