@@ -234,3 +234,37 @@ class BatchFindingApiTest(APITestCase):
 
         hist = self.client.get(f"/api/v1/history-findings?asset_id={self.asset.id}")
         self.assertEqual(hist.status_code, status.HTTP_200_OK)
+
+
+class ProjectAssetDetailTest(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.pm = User.objects.create_user(username='pm_detail', email='pmd@test.com', password='Pm123456!')
+        self.qa = User.objects.create_user(username='qa_detail', email='qad@test.com', password='Qa123456!')
+        pm_role, _ = Role.objects.get_or_create(code='PM', defaults={'name': 'PM'})
+        qa_role, _ = Role.objects.get_or_create(code='QA', defaults={'name': 'QA'})
+        UserRole.objects.create(user=self.pm, role=pm_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.qa, role=qa_role, scope_type=UserRole.ScopeType.GLOBAL)
+        self.customer = Customer.objects.create(name='CD', code='cd')
+        self.project = Project.objects.create(customer=self.customer, name='DetailProj', code='detail', created_by=self.pm, project_manager=self.pm)
+        ProjectMember.objects.create(project=self.project, user=self.qa, member_type=ProjectMember.MemberType.QA)
+        self.asset = Asset.objects.create(project=self.project, name='asset-d', asset_type=Asset.AssetType.HOST)
+
+    def _token(self, username, password):
+        return self.client.post('/api/v1/auth/login', {'username': username, 'password': password}, format='json').data['access']
+
+    def test_project_detail_contains_entries(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('pm_detail', 'Pm123456!')}")
+        r = self.client.get(f'/api/v1/projects/{self.project.id}')
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertIn('asset_list_entry', r.data)
+
+    def test_asset_detail_contains_resource_entries_and_qa_readonly(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('pm_detail', 'Pm123456!')}")
+        r = self.client.get(f'/api/v1/assets/{self.asset.id}')
+        self.assertEqual(r.status_code, status.HTTP_200_OK)
+        self.assertIn('customer', r.data)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('qa_detail', 'Qa123456!')}")
+        p = self.client.patch(f'/api/v1/assets/{self.asset.id}', {'name': 'nope'}, format='json')
+        self.assertEqual(p.status_code, status.HTTP_403_FORBIDDEN)

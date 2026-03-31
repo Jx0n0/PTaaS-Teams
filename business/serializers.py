@@ -70,11 +70,15 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
     customer = CustomerSummarySerializer(read_only=True)
     project_manager = UserSummarySerializer(read_only=True)
     created_by = UserSummarySerializer(read_only=True)
+    asset_count = serializers.IntegerField(read_only=True)
+    batch_count = serializers.IntegerField(read_only=True)
+    finding_count = serializers.IntegerField(read_only=True)
+    open_finding_count = serializers.IntegerField(read_only=True)
     pm_members = serializers.SerializerMethodField(); tester_members = serializers.SerializerMethodField(); qa_members = serializers.SerializerMethodField()
     asset_list_entry = serializers.SerializerMethodField()
     class Meta:
         model = Project
-        fields = ['id','name','code','customer','test_type','status','description','start_date','end_date','project_manager','created_by','pm_members','tester_members','qa_members','asset_list_entry','created_at','updated_at']
+        fields = ['id','name','code','customer','test_type','status','description','start_date','end_date','project_manager','created_by','asset_count','batch_count','finding_count','open_finding_count','pm_members','tester_members','qa_members','asset_list_entry','created_at','updated_at']
     def _members(self, obj, t): return ProjectMemberSerializer([m for m in obj.members.all() if m.member_type == t], many=True).data
     def get_pm_members(self, obj): return self._members(obj, ProjectMember.MemberType.PM)
     def get_tester_members(self, obj): return self._members(obj, ProjectMember.MemberType.TESTER)
@@ -101,10 +105,22 @@ class AssetListSerializer(serializers.ModelSerializer):
 class AssetDetailSerializer(serializers.ModelSerializer):
     project = ProjectSummarySerializer(read_only=True)
     customer = serializers.SerializerMethodField()
+    batch_count = serializers.IntegerField(read_only=True)
+    scan_file_count = serializers.IntegerField(read_only=True)
+    finding_count = serializers.IntegerField(read_only=True)
+    history_finding_count = serializers.IntegerField(read_only=True)
+    batches = serializers.SerializerMethodField()
+    scan_files = serializers.SerializerMethodField()
+    findings = serializers.SerializerMethodField()
+    history_findings = serializers.SerializerMethodField()
     class Meta:
         model = Asset
-        fields = ['id','project','customer','asset_type','name','ip_address','fqdn','url','environment','owner','tags_json','description','created_at','updated_at']
+        fields = ['id','project','customer','asset_type','name','ip_address','fqdn','url','environment','owner','tags_json','description','batch_count','scan_file_count','finding_count','history_finding_count','batches','scan_files','findings','history_findings','created_at','updated_at']
     def get_customer(self, obj): return CustomerSummarySerializer(obj.project.customer).data
+    def get_batches(self, obj): return f'/api/v1/assets/{obj.id}/batches'
+    def get_scan_files(self, obj): return f'/api/v1/scan-files?batch__asset_id={obj.id}'
+    def get_findings(self, obj): return f'/api/v1/assets/{obj.id}/findings'
+    def get_history_findings(self, obj): return f'/api/v1/assets/{obj.id}/history-findings'
 
 
 class AssetWriteSerializer(serializers.ModelSerializer):

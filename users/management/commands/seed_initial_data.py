@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from business.models import Asset, Batch, Customer, Project
+from business.models import Asset, Batch, Customer, Finding, HistoryFinding, Project, ScanFile
 from users.models import Role, UserRole
 
 
@@ -34,7 +34,43 @@ class Command(BaseCommand):
         customer, _ = Customer.objects.get_or_create(code='acme', defaults={'name': 'ACME Corp'})
         project, _ = Project.objects.get_or_create(customer=customer, code='web-2026', defaults={'name': 'Web Pentest 2026'})
         asset, _ = Asset.objects.get_or_create(project=project, name='Main Domain', defaults={'asset_type': Asset.AssetType.DOMAIN, 'fqdn': 'acme.com', 'environment': Asset.Environment.PROD})
-        Batch.objects.get_or_create(asset=asset, batch_no='2026-Q1', defaults={'name': 'Q1 Full Scan', 'status': 'testing'})
+        batch, _ = Batch.objects.get_or_create(asset=asset, batch_no='2026-Q1', defaults={'name': 'Q1 Full Scan', 'status': 'testing'})
+
+        scan_file, _ = ScanFile.objects.get_or_create(
+            batch=batch,
+            file_name='demo.nessus',
+            defaults={
+                'file_type': ScanFile.FileType.NESSUS,
+                'parser_type': 'nessus',
+                'storage_key': f'minio/scan-files/{batch.id}/demo.nessus',
+                'uploaded_by': tester,
+            },
+        )
+        finding, _ = Finding.objects.get_or_create(
+            batch=batch,
+            asset=asset,
+            title='Demo SQL Injection',
+            defaults={
+                'source_type': Finding.SourceType.MANUAL,
+                'severity': Finding.Severity.HIGH,
+                'status': Finding.Status.OPEN,
+                'description_html': '<p>Demo finding for seeded data</p>',
+                'created_by': tester,
+                'updated_by': tester,
+            },
+        )
+        HistoryFinding.objects.get_or_create(
+            asset=asset,
+            finding=finding,
+            batch=batch,
+            defaults={
+                'snapshot_title': finding.title,
+                'snapshot_severity': finding.severity,
+                'snapshot_status': finding.status,
+                'snapshot_data_json': {'seeded': True},
+            },
+        )
+
 
         UserRole.objects.get_or_create(user=admin, role=admin_role, scope_type=UserRole.ScopeType.GLOBAL)
         UserRole.objects.get_or_create(user=pm, role=pm_role, scope_type=UserRole.ScopeType.PROJECT, project=project)

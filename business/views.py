@@ -51,9 +51,9 @@ class CustomerViewSet(ModelViewSet):
 
 
 class ProjectViewSet(ModelViewSet):
-    queryset = Project.objects.none(); permission_classes = [IsScopedProjectWritePermission, IsScopedObjectAccessible]
+    queryset = Project.objects.none(); permission_classes = [IsAdminOrPMWriteElseReadOnly, IsScopedObjectAccessible]
     def get_queryset(self):
-        qs = visible_projects_queryset(self.request.user).annotate(asset_count=Count('assets', distinct=True), batch_count=Count('assets__batches', distinct=True)).order_by('-created_at')
+        qs = visible_projects_queryset(self.request.user).annotate(asset_count=Count('assets', distinct=True), batch_count=Count('assets__batches', distinct=True), finding_count=Count('assets__findings', distinct=True), open_finding_count=Count('assets__findings', filter=Q(assets__findings__status__in=['draft','open']), distinct=True)).order_by('-created_at')
         for key, field in [('customer_id','customer_id'),('status','status'),('test_type','test_type'),('project_manager','project_manager_id')]:
             if v := self.request.query_params.get(key): qs = qs.filter(**{field: v})
         if q := self.request.query_params.get('search'): qs = qs.filter(Q(name__icontains=q) | Q(code__icontains=q))
@@ -68,7 +68,7 @@ class ProjectViewSet(ModelViewSet):
 class AssetViewSet(ScopedProjectQuerysetMixin, ModelViewSet):
     queryset = Asset.objects.none(); permission_classes = [IsScopedProjectWritePermission, IsScopedObjectAccessible]
     def get_queryset(self):
-        qs = Asset.objects.filter(project_id__in=self.visible_project_ids()).select_related('project', 'project__customer').annotate(batch_count=Count('batches', distinct=True), finding_count=Count('findings', distinct=True)).order_by('-created_at')
+        qs = Asset.objects.filter(project_id__in=self.visible_project_ids()).select_related('project', 'project__customer').annotate(batch_count=Count('batches', distinct=True), scan_file_count=Count('batches__scan_files', distinct=True), finding_count=Count('findings', distinct=True), history_finding_count=Count('history_findings', distinct=True)).order_by('-created_at')
         if v := self.request.query_params.get('project_id'): qs = qs.filter(project_id=v)
         if v := self.request.query_params.get('asset_type'): qs = qs.filter(asset_type=v)
         if v := self.request.query_params.get('environment'): qs = qs.filter(environment=v)
@@ -142,7 +142,10 @@ class ScanFileViewSet(ScopedProjectQuerysetMixin, ModelViewSet):
     permission_classes = [IsScopedProjectWritePermission, IsScopedObjectAccessible]
     http_method_names = ['get', 'post', 'head', 'options']
     def get_queryset(self):
-        return ScanFile.objects.filter(batch__asset__project_id__in=self.visible_project_ids()).select_related('batch','batch__asset','uploaded_by').order_by('-uploaded_at')
+        qs = ScanFile.objects.filter(batch__asset__project_id__in=self.visible_project_ids()).select_related('batch','batch__asset','uploaded_by').order_by('-uploaded_at')
+        if v := self.request.query_params.get('batch_id'): qs = qs.filter(batch_id=v)
+        if v := self.request.query_params.get('asset_id'): qs = qs.filter(batch__asset_id=v)
+        return qs
     @action(detail=False, methods=['post'], url_path='upload')
     def upload(self, request):
         batch_id = request.data.get('batch_id'); file_type = request.data.get('file_type'); file = request.FILES.get('file')

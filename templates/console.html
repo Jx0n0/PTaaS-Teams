@@ -29,10 +29,10 @@
         <button class="nav sub" data-title="Project Detail">项目详情</button>
         <button class="nav sub2" data-title="Asset List">资产列表</button>
         <button class="nav sub2" data-title="Asset Detail">资产详情</button>
-        <button class="nav sub3" data-title="Batches">批次</button>
-        <button class="nav sub3" data-title="Scan Files">扫描文件</button>
-        <button class="nav sub3" data-title="Findings">漏洞</button>
-        <button class="nav sub3" data-title="History Findings">历史漏洞</button>
+        <button class="nav sub3 item" data-tab="batches" data-title="批次" data-implemented="1">批次</button>
+        <button class="nav sub3 item" data-tab="scanfiles" data-title="扫描文件" data-implemented="1">扫描文件</button>
+        <button class="nav sub3 item" data-tab="findings" data-title="漏洞" data-implemented="1">漏洞</button>
+        <button class="nav sub3 item" data-tab="historyFindings" data-title="历史漏洞" data-implemented="1">历史漏洞</button>
       </div>
 
       <button class="nav group-toggle" data-group="assets">资产中心</button>
@@ -138,6 +138,26 @@
         <div class="card hidden" id="projectsTab">
           <h3>项目管理</h3>
           <table><thead><tr><th>ID</th><th>名称</th><th>客户ID</th><th>类型</th><th>状态</th></tr></thead><tbody id="projectsBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="batchesTab">
+          <h3>批次</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>批次号</th><th>状态</th><th>资产</th></tr></thead><tbody id="batchesBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="scanfilesTab">
+          <h3>扫描文件</h3>
+          <table><thead><tr><th>ID</th><th>文件名</th><th>类型</th><th>解析状态</th><th>上传时间</th></tr></thead><tbody id="scanfilesBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="findingsTab">
+          <h3>漏洞</h3>
+          <table><thead><tr><th>ID</th><th>标题</th><th>严重性</th><th>状态</th><th>来源</th></tr></thead><tbody id="findingsBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="historyFindingsTab">
+          <h3>历史漏洞</h3>
+          <table><thead><tr><th>ID</th><th>标题</th><th>严重性</th><th>状态</th><th>快照时间</th></tr></thead><tbody id="historyFindingsBody"></tbody></table>
         </div>
         <div class="card hidden" id="placeholderTab">
           <h3 id="placeholderTitle">功能待开发</h3>

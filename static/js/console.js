@@ -20,7 +20,7 @@ async function login(){
   try{
     const data=await request('/api/v1/auth/login',{method:'POST',body:JSON.stringify({username:$('username').value,password:$('password').value})});
     access=data.access;refresh=data.refresh;localStorage.setItem('access',access);localStorage.setItem('refresh',refresh);
-    $('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');await Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects()]);
+    $('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');await Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects(),loadBatches(),loadScanFiles(),loadFindings(),loadHistoryFindings()]);
   }catch{ $('loginMsg').innerText='登录失败，请检查用户名密码'; }
 }
 
@@ -33,7 +33,12 @@ async function loadMe(){
 async function loadUsers(){ const ds=listData(await request('/api/v1/users')); $('usersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.username}</td><td>${x.email||''}</td><td>${(x.roles||[]).join(',')}</td></tr>`).join(''); }
 async function loadRoles(){ const ds=listData(await request('/api/v1/roles')); $('rolesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.code}</td><td>${x.name}</td><td>${x.description||''}</td></tr>`).join(''); }
 async function loadCustomers(){ const ds=listData(await request('/api/v1/customers')); $('customersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.code||''}</td><td>${x.status||''}</td><td>${x.project_count ?? ''}</td></tr>`).join(''); }
-async function loadProjects(){ const ds=listData(await request('/api/v1/projects')); $('projectsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.customer||''}</td><td>${x.test_type||''}</td><td>${x.status||''}</td></tr>`).join(''); }
+async function loadProjects(){ const ds=listData(await request('/api/v1/projects')); $('projectsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.customer?.name||''}</td><td>${x.test_type||''}</td><td>${x.status||''}</td></tr>`).join(''); }
+
+async function loadBatches(){ const ds=listData(await request('/api/v1/batches')); $('batchesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.batch_no||''}</td><td>${x.status||''}</td><td>${x.asset?.name||''}</td></tr>`).join(''); }
+async function loadScanFiles(){ const ds=listData(await request('/api/v1/scan-files')); $('scanfilesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.file_name||''}</td><td>${x.file_type||''}</td><td>${x.parse_status||''}</td><td>${x.uploaded_at||''}</td></tr>`).join(''); }
+async function loadFindings(){ const ds=listData(await request('/api/v1/findings')); $('findingsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.title||''}</td><td>${x.severity||''}</td><td>${x.status||''}</td><td>${x.source_type||''}</td></tr>`).join(''); }
+async function loadHistoryFindings(){ const ds=listData(await request('/api/v1/history-findings')); $('historyFindingsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.snapshot_title||''}</td><td>${x.snapshot_severity||''}</td><td>${x.snapshot_status||''}</td><td>${x.snapshot_at||''}</td></tr>`).join(''); }
 
 async function createUser(){await request('/api/v1/users',{method:'POST',body:JSON.stringify({username:$('newUsername').value,email:$('newEmail').value,full_name:$('newFullName').value,password:$('newPassword').value})});await loadUsers();}
 async function createRole(){await request('/api/v1/roles',{method:'POST',body:JSON.stringify({code:$('roleCode').value,name:$('roleName').value,description:$('roleDesc').value})});await loadRoles();}
@@ -44,7 +49,7 @@ async function changePassword(){
 }
 
 function showTab(target, title){
-  ['dashboardTab','usersTab','rolesTab','customersTab','projectsTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
+  ['dashboardTab','usersTab','rolesTab','customersTab','projectsTab','batchesTab','scanfilesTab','findingsTab','historyFindingsTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
   if (target) {
     $(target).classList.remove('hidden');
   } else {
@@ -54,7 +59,7 @@ function showTab(target, title){
 }
 
 function initNav(){
-  const itemMap={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab',customers:'customersTab',projects:'projectsTab'};
+  const itemMap={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab',customers:'customersTab',projects:'projectsTab',batches:'batchesTab',scanfiles:'scanfilesTab',findings:'findingsTab',historyFindings:'historyFindingsTab'};
   document.querySelectorAll('.nav.item, .nav.sub, .nav.sub2, .nav.sub3').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
@@ -87,4 +92,4 @@ $('logoutBtn').onclick=logout;
 $('userMenuBtn').onclick=toggleUserDropdown;
 initNav();
 
-if(access){$('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects()]);}
+if(access){$('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects(),loadBatches(),loadScanFiles(),loadFindings(),loadHistoryFindings()]);}
