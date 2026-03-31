@@ -1,0 +1,95 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTaaS Teams Console</title>
+  <link rel="stylesheet" href="{% static 'css/console.css' %}">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sider">
+      <div class="brand">PTaaS</div>
+      <button class="nav active" data-tab="dashboard">工作台</button>
+      <div class="menu-title">系统管理</div>
+      <button class="nav" data-tab="users">用户管理</button>
+      <button class="nav" data-tab="roles">角色管理</button>
+      <button class="nav" data-tab="bindings">角色绑定</button>
+      <button class="nav" data-tab="security">修改密码</button>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2>平台基础能力控制台</h2>
+          <p>认证 / 用户 / 角色 / 权限边界</p>
+        </div>
+        <button id="logoutBtn" class="btn ghost">退出</button>
+      </header>
+
+      <section id="loginPanel" class="panel card">
+        <h3>登录</h3>
+        <div class="row">
+          <input id="username" placeholder="用户名" />
+          <input id="password" type="password" placeholder="密码" />
+          <button id="loginBtn" class="btn">登录</button>
+        </div>
+        <p id="loginMsg"></p>
+      </section>
+
+      <section id="appPanel" class="hidden">
+        <div class="card" id="dashboardTab">
+          <h3>我的信息</h3>
+          <pre id="meBox">加载中...</pre>
+        </div>
+
+        <div class="card hidden" id="usersTab">
+          <h3>用户管理</h3>
+          <div class="row">
+            <input id="newUsername" placeholder="用户名" />
+            <input id="newEmail" placeholder="邮箱" />
+            <input id="newFullName" placeholder="姓名" />
+            <input id="newPassword" type="password" placeholder="初始密码" />
+            <button id="createUserBtn" class="btn">创建用户</button>
+          </div>
+          <table><thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th></tr></thead><tbody id="usersBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="rolesTab">
+          <h3>角色管理</h3>
+          <div class="row">
+            <input id="roleCode" placeholder="角色编码" />
+            <input id="roleName" placeholder="角色名称" />
+            <input id="roleDesc" placeholder="描述" />
+            <button id="createRoleBtn" class="btn">创建角色</button>
+          </div>
+          <table><thead><tr><th>ID</th><th>编码</th><th>名称</th><th>描述</th></tr></thead><tbody id="rolesBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="bindingsTab">
+          <h3>用户角色绑定</h3>
+          <div class="row">
+            <select id="bindUser"></select>
+            <select id="bindRole"></select>
+            <select id="bindScope"><option>GLOBAL</option><option>CUSTOMER</option><option>PROJECT</option></select>
+            <button id="bindBtn" class="btn">创建绑定</button>
+          </div>
+          <table><thead><tr><th>ID</th><th>User</th><th>Role</th><th>Scope</th></tr></thead><tbody id="bindingsBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="securityTab">
+          <h3>修改密码</h3>
+          <div class="row">
+            <input id="oldPwd" type="password" placeholder="旧密码" />
+            <input id="newPwd" type="password" placeholder="新密码" />
+            <input id="newPwd2" type="password" placeholder="确认新密码" />
+            <button id="pwdBtn" class="btn">修改密码</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="{% static 'js/console.js' %}"></script>
+</body>
+</html>
