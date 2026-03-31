@@ -1,0 +1,5 @@
+Django>=5.0,<6.0
+djangorestframework>=3.15
+djangorestframework-simplejwt>=5.3
+psycopg[binary]>=3.1
+drf-spectacular>=0.27
