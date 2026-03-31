@@ -127,3 +127,28 @@ class PlatformApiTest(APITestCase):
         resp = self.client.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
         self.assertIn('平台基础能力控制台', resp.content.decode('utf-8'))
+
+class CustomerProjectModuleTest(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.pm = User.objects.create_user(username='pm1', email='pm1@test.com', password='Pm123456!')
+        self.tester = User.objects.create_user(username='tester2', email='tester2@test.com', password='Tester123!')
+        self.pm_role, _ = Role.objects.get_or_create(code='PM', defaults={'name': 'Project Manager'})
+        self.tester_role, _ = Role.objects.get_or_create(code='TESTER', defaults={'name': 'Tester'})
+        UserRole.objects.create(user=self.pm, role=self.pm_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.tester, role=self.tester_role, scope_type=UserRole.ScopeType.GLOBAL)
+
+    def _token(self, u, p):
+        return self.client.post('/api/v1/auth/login', {'username': u, 'password': p}, format='json').data['access']
+
+    def test_pm_can_create_customer_project(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('pm1', 'Pm123456!')}")
+        c = self.client.post('/api/v1/customers', {'name': 'ACME', 'code': 'acme', 'status': 'active'}, format='json')
+        self.assertEqual(c.status_code, status.HTTP_201_CREATED)
+        p = self.client.post('/api/v1/projects', {'customer': c.data['id'], 'name': 'Web', 'code': 'web', 'test_type': 'web'}, format='json')
+        self.assertEqual(p.status_code, status.HTTP_201_CREATED)
+
+    def test_tester_readonly_customer(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('tester2', 'Tester123!')}")
+        resp = self.client.post('/api/v1/customers', {'name': 'Bad', 'code': 'bad'}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
