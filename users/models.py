@@ -9,6 +9,7 @@ class User(AbstractUser, TimeStampedModel):
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
+    token_version = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.username

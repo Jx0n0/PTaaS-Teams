@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from users.auth_views import ChangePasswordView, LoginView, MeView, RefreshView
 from users.views import RoleViewSet, UserRoleViewSet, UserViewSet
 from business.views import AssetViewSet, BatchViewSet, CustomerViewSet, ProjectViewSet
 
@@ -19,7 +19,9 @@ router.register(r'batches', BatchViewSet, basename='batch')
 urlpatterns = [
     path('', RedirectView.as_view(url='/admin/', permanent=False)),
     path('admin/', admin.site.urls),
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/', include(router.urls)),
+    path('api/v1/auth/login', LoginView.as_view(), name='auth_login'),
+    path('api/v1/auth/refresh', RefreshView.as_view(), name='auth_refresh'),
+    path('api/v1/auth/me', MeView.as_view(), name='auth_me'),
+    path('api/v1/auth/change-password', ChangePasswordView.as_view(), name='auth_change_password'),
+    path('api/v1/', include(router.urls)),
 ]

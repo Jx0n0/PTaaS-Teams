@@ -1,61 +1,46 @@
 # Phase 1 Backend Design (Django/DRF)
 
-## 1. Model Design
+## Scope for current stage
+Current stage focuses on platform infrastructure only:
+- Login authentication
+- User management
+- Role management
+- User-role binding
+- Basic permission boundary
+- Password change
+- Built-in admin account (dev seed)
+- Base user info API
+- Django admin support
 
-### Auth & RBAC
-- `User`: internal staff identity (`AUTH_USER_MODEL`) for PM/Tester/QA/Admin.
-- `Role`: role template with stable code (`admin`, `pm`, `tester`, `qa`).
-- `UserRole`: many-to-many mapping with scope:
-  - `GLOBAL`: platform-level
-  - `CUSTOMER`: customer-level
-  - `PROJECT`: project-level
+Business tree entities (`Customer/Project/Asset/Batch`) remain as extension-ready placeholders only.
 
-### Business Tree
-- `Customer` -> `Project` -> `Asset` -> `Batch`.
-- This aligns with future attachment points for `Scan File`, `Findings`, `History Findings`, and report workflow.
+## Auth APIs (`/api/v1/auth/*`)
+- `POST /api/v1/auth/login`
+- `POST /api/v1/auth/refresh`
+- `GET /api/v1/auth/me`
+- `POST /api/v1/auth/change-password`
 
-### Extensibility Principles
-- Shared `TimeStampedModel` for all entities.
-- Stable unique business identifiers (`Customer.code`, per-customer `Project.code`).
-- `Batch.extra` JSON as extensible metadata slot for parser/workflow states.
+### Login response
+- `access`
+- `refresh`
+- `user` (`id`, `username`, `email`, `full_name`, `is_active`, `roles`)
+- `roles`
 
-## 2. Permission Scope
+### Password policy handling
+- validate old password
+- confirm new password twice
+- use Django default password hash + validators
+- increment `token_version` for future forced relogin mechanism
 
-`ScopeService` resolves accessible customer/project sets by `UserRole`, with queryset filtering + object access checks.
-
-Role capabilities in Phase 1:
-- `Admin`: full platform access (user/role management + all business resources)
-- `PM`: manage `Customer`/`Project` and read/write scoped resources
-- `Tester`: manage `Asset`/`Batch` in scoped projects
-- `QA`: read scoped resources (write for findings/report in later phases)
-
-## 3. API Surface (Phase 1)
-
-JWT:
-- `POST /api/token/`
-- `POST /api/token/refresh/`
-
-CRUD ViewSets:
-- `/api/users/`
-- `/api/roles/`
-- `/api/user-roles/`
-- `/api/customers/`
-- `/api/projects/`
-- `/api/assets/`
-- `/api/batches/`
-
-## 4. Seed Strategy
-
+## Seed Strategy
 Command: `python manage.py seed_initial_data`
 
-Creates:
-- roles: `admin`, `pm`, `tester`, `qa`
-- users: `admin`, `pm_demo`, `tester_demo`, `qa_demo`
-- baseline tree: `acme -> web-2026 -> Main Domain -> Q1 Full Scan`
-- sample scoped role assignments on project level
+Default local dev users:
+- `admin / Admin123!`
+- `pm_demo / Pm123456!`
+- `tester_demo / Tester123!`
+- `qa_demo / Qa123456!`
 
-## 5. Docker Runtime
-
-- `docker-compose up --build`
+## Docker Runtime
+- `docker compose up --build`
 - web container auto-runs migrations + seed command before dev server.
-- default admin credential (dev only): `admin / Admin123!`.
