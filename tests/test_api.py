@@ -66,6 +66,11 @@ class APISmokeTest(APITestCase):
         )
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
+    def test_root_redirects_to_admin(self):
+        resp = self.client.get('/')
+        self.assertEqual(resp.status_code, status.HTTP_302_FOUND)
+        self.assertEqual(resp.headers['Location'], '/admin/')
+
     def test_scoped_user_only_sees_assigned_project_assets(self):
         other_customer = Customer.objects.create(code='initech', name='Initech')
         other_project = Project.objects.create(customer=other_customer, code='ext', name='External')

@@ -57,4 +57,5 @@ Creates:
 ## 5. Docker Runtime
 
 - `docker-compose up --build`
-- web container auto-runs migrations before dev server.
+- web container auto-runs migrations + seed command before dev server.
+- default admin credential (dev only): `admin / Admin123!`.
