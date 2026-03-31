@@ -1,0 +1,187 @@
+{% load static %}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PTaaS Teams Console</title>
+  <link rel="stylesheet" href="{% static 'css/console.css' %}">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sider">
+      <div class="brand">PTaaS</div>
+
+      <button class="nav item active" data-tab="dashboard" data-title="Dashboard" data-implemented="1">仪表盘</button>
+
+      <button class="nav group-toggle" data-group="client">客户管理</button>
+      <div class="group hidden" id="group-client">
+        <button class="nav sub item" data-tab="customers" data-title="客户管理" data-implemented="1">客户列表</button>
+        <button class="nav sub" data-title="Client Detail">客户详情</button>
+        <button class="nav sub2" data-title="Projects">项目</button>
+        <button class="nav sub2" data-title="Report Templates">报告模板</button>
+        <button class="nav sub2" data-title="Reports">报告</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="projects">项目管理</button>
+      <div class="group hidden" id="group-projects">
+        <button class="nav sub item" data-tab="projects" data-title="项目管理" data-implemented="1">项目列表</button>
+        <button class="nav sub" data-title="Project Detail">项目详情</button>
+        <button class="nav sub2" data-title="Asset List">资产列表</button>
+        <button class="nav sub2" data-title="Asset Detail">资产详情</button>
+        <button class="nav sub3 item" data-tab="batches" data-title="批次" data-implemented="1">批次</button>
+        <button class="nav sub3 item" data-tab="scanfiles" data-title="扫描文件" data-implemented="1">扫描文件</button>
+        <button class="nav sub3 item" data-tab="findings" data-title="漏洞" data-implemented="1">漏洞</button>
+        <button class="nav sub3 item" data-tab="historyFindings" data-title="历史漏洞" data-implemented="1">历史漏洞</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="assets">资产中心</button>
+      <div class="group hidden" id="group-assets"><button class="nav sub" data-title="Asset List">资产列表</button></div>
+
+      <button class="nav group-toggle" data-group="findings">漏洞中心</button>
+      <div class="group hidden" id="group-findings">
+        <button class="nav sub" data-title="All Findings">全部漏洞</button>
+        <button class="nav sub" data-title="My Findings">我的漏洞</button>
+        <button class="nav sub" data-title="Finding Detail">漏洞详情</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="templates">模板中心</button>
+      <div class="group hidden" id="group-templates">
+        <button class="nav sub" data-title="Vulnerability Database">漏洞模板库</button>
+        <button class="nav sub" data-title="Report Templates">报告模板</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="reports">报告中心</button>
+      <div class="group hidden" id="group-reports">
+        <button class="nav sub" data-title="Generate Report">生成报告</button>
+        <button class="nav sub" data-title="Report List">报告列表</button>
+        <button class="nav sub" data-title="Report Detail">报告详情</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="workflow">流程中心</button>
+      <div class="group hidden" id="group-workflow">
+        <button class="nav sub" data-title="My Tasks">我的任务</button>
+        <button class="nav sub" data-title="Qa Review Queue">QA 审核队列</button>
+        <button class="nav sub" data-title="Tester Tasks">测试任务</button>
+        <button class="nav sub" data-title="Pm Review">PM 审核</button>
+      </div>
+
+      <button class="nav group-toggle" data-group="system">系统管理</button>
+      <div class="group hidden" id="group-system">
+        <button class="nav item" data-tab="users" data-title="用户管理" data-implemented="1">用户管理</button>
+        <button class="nav item" data-tab="roles" data-title="角色管理" data-implemented="1">角色管理</button>
+        <button class="nav sub" data-title="Audit Logs">审计日志</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <h2>平台基础能力控制台</h2>
+          <p>认证 / 用户 / 角色 / 权限边界</p>
+        </div>
+
+        <div class="user-menu-wrap">
+          <button id="userMenuBtn" class="btn ghost"><span id="currentUsername">当前用户</span> ▾</button>
+          <div id="userDropdown" class="user-dropdown hidden">
+            <button id="openPwdModalBtn">修改密码</button>
+            <button id="logoutBtn">退出登录</button>
+          </div>
+        </div>
+      </header>
+
+      <section id="loginPanel" class="panel card">
+        <h3>登录</h3>
+        <div class="row">
+          <input id="username" placeholder="用户名" />
+          <input id="password" type="password" placeholder="密码" />
+          <button id="loginBtn" class="btn">登录</button>
+        </div>
+        <p id="loginMsg"></p>
+      </section>
+
+      <section id="appPanel" class="hidden">
+        <div class="card" id="dashboardTab">
+          <h3>我的信息</h3>
+          <pre id="meBox">加载中...</pre>
+        </div>
+
+        <div class="card hidden" id="usersTab">
+          <h3>用户管理</h3>
+          <div class="row">
+            <input id="newUsername" placeholder="用户名" />
+            <input id="newEmail" placeholder="邮箱" />
+            <input id="newFullName" placeholder="姓名" />
+            <input id="newPassword" type="password" placeholder="初始密码" />
+            <button id="createUserBtn" class="btn">创建用户</button>
+          </div>
+          <table><thead><tr><th>ID</th><th>用户名</th><th>邮箱</th><th>角色</th></tr></thead><tbody id="usersBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="rolesTab">
+          <h3>角色管理</h3>
+          <div class="row">
+            <input id="roleCode" placeholder="角色编码" />
+            <input id="roleName" placeholder="角色名称" />
+            <input id="roleDesc" placeholder="描述" />
+            <button id="createRoleBtn" class="btn">创建角色</button>
+          </div>
+          <table><thead><tr><th>ID</th><th>编码</th><th>名称</th><th>描述</th></tr></thead><tbody id="rolesBody"></tbody></table>
+        </div>
+
+
+        <div class="card hidden" id="customersTab">
+          <h3>客户管理</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>编码</th><th>状态</th><th>项目数</th></tr></thead><tbody id="customersBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="projectsTab">
+          <h3>项目管理</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>客户ID</th><th>类型</th><th>状态</th></tr></thead><tbody id="projectsBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="batchesTab">
+          <h3>批次</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>批次号</th><th>状态</th><th>资产</th></tr></thead><tbody id="batchesBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="scanfilesTab">
+          <h3>扫描文件</h3>
+          <table><thead><tr><th>ID</th><th>文件名</th><th>类型</th><th>解析状态</th><th>上传时间</th></tr></thead><tbody id="scanfilesBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="findingsTab">
+          <h3>漏洞</h3>
+          <table><thead><tr><th>ID</th><th>标题</th><th>严重性</th><th>状态</th><th>来源</th></tr></thead><tbody id="findingsBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="historyFindingsTab">
+          <h3>历史漏洞</h3>
+          <table><thead><tr><th>ID</th><th>标题</th><th>严重性</th><th>状态</th><th>快照时间</th></tr></thead><tbody id="historyFindingsBody"></tbody></table>
+        </div>
+        <div class="card hidden" id="placeholderTab">
+          <h3 id="placeholderTitle">功能待开发</h3>
+          <p>该功能已预留导航入口，后续阶段逐步实现。</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="pwdModal" class="modal hidden">
+    <div class="modal-content">
+      <h3>修改密码</h3>
+      <div class="row-col">
+        <input id="oldPwd" type="password" placeholder="旧密码" />
+        <input id="newPwd" type="password" placeholder="新密码" />
+        <input id="confirmPwd" type="password" placeholder="确认新密码" />
+      </div>
+      <div class="row">
+        <button id="submitPwdBtn" class="btn">提交</button>
+        <button id="closePwdModalBtn" class="btn ghost">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/console.js' %}"></script>
+</body>
+</html>
