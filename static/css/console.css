@@ -5,3 +5,5 @@ body{margin:0;background:#f5f7fb;font-family:Inter,Arial}
 .card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-top:14px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 input,select{padding:8px;border:1px solid #d1d5db;border-radius:8px;min-width:120px}.btn{background:#1677ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}.btn.ghost{background:#fff;color:#111827;border:1px solid #d1d5db}
 .hidden{display:none}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}pre{background:#0f172a;color:#f8fafc;border-radius:10px;padding:12px;overflow:auto}
+
+.menu-title{color:#93c5fd;font-size:12px;margin-top:6px;padding:4px 2px;}

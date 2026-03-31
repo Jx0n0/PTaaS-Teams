@@ -1,4 +1,4 @@
-from django.db import migrations, models
+from django.db import migrations
 
 
 class Migration(migrations.Migration):
@@ -6,10 +6,4 @@ class Migration(migrations.Migration):
         ('users', '0002_userrole_scope_fk'),
     ]
 
-    operations = [
-        migrations.AddField(
-            model_name='user',
-            name='token_version',
-            field=models.PositiveIntegerField(default=0),
-        ),
-    ]
+    operations = []

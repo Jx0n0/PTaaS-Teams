@@ -7,7 +7,7 @@ from users.auth_views import ChangePasswordView, LoginView, MeView, RefreshView
 from users.views import RoleViewSet, UserRoleViewSet, UserViewSet
 from business.views import AssetViewSet, BatchViewSet, CustomerViewSet, ProjectViewSet
 
-router = DefaultRouter()
+router = DefaultRouter(trailing_slash=False)
 router.register(r'users', UserViewSet, basename='user')
 router.register(r'roles', RoleViewSet, basename='role')
 router.register(r'user-roles', UserRoleViewSet, basename='user-role')

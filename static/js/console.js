@@ -26,18 +26,19 @@ async function login(){
 
 async function loadAll(){await Promise.all([loadMe(),loadUsers(),loadRoles(),loadBindings(),loadSelects()]);}
 async function loadMe(){ $('meBox').textContent=JSON.stringify(await request('/api/v1/auth/me'),null,2); }
-async function loadUsers(){ const ds=await request('/api/v1/users/'); $('usersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.username}</td><td>${x.email||''}</td><td>${(x.roles||[]).join(',')}</td></tr>`).join(''); window._users=ds; }
-async function loadRoles(){ const ds=await request('/api/v1/roles/'); $('rolesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.code}</td><td>${x.name}</td><td>${x.description||''}</td></tr>`).join(''); window._roles=ds; }
-async function loadBindings(){ const ds=await request('/api/v1/user-roles/'); $('bindingsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.user}</td><td>${x.role}</td><td>${x.scope_type}</td></tr>`).join(''); }
+const listData=(payload)=>Array.isArray(payload)?payload:(payload.results||[]);
+async function loadUsers(){ const ds=listData(await request('/api/v1/users'));  $('usersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.username}</td><td>${x.email||''}</td><td>${(x.roles||[]).join(',')}</td></tr>`).join(''); window._users=ds; }
+async function loadRoles(){ const ds=listData(await request('/api/v1/roles'));  $('rolesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.code}</td><td>${x.name}</td><td>${x.description||''}</td></tr>`).join(''); window._roles=ds; }
+async function loadBindings(){ const ds=listData(await request('/api/v1/user-roles'));  $('bindingsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.user}</td><td>${x.role}</td><td>${x.scope_type}</td></tr>`).join(''); }
 
 function loadSelects(){
   $('bindUser').innerHTML=(window._users||[]).map(u=>`<option value='${u.id}'>${u.username}</option>`).join('');
   $('bindRole').innerHTML=(window._roles||[]).map(r=>`<option value='${r.id}'>${r.code}</option>`).join('');
 }
 
-async function createUser(){await request('/api/v1/users/',{method:'POST',body:JSON.stringify({username:$('newUsername').value,email:$('newEmail').value,full_name:$('newFullName').value,password:$('newPassword').value})});await loadUsers();}
-async function createRole(){await request('/api/v1/roles/',{method:'POST',body:JSON.stringify({code:$('roleCode').value,name:$('roleName').value,description:$('roleDesc').value})});await loadRoles();loadSelects();}
-async function createBinding(){await request('/api/v1/user-roles/',{method:'POST',body:JSON.stringify({user:Number($('bindUser').value),role:Number($('bindRole').value),scope_type:$('bindScope').value})});await loadBindings();}
+async function createUser(){await request('/api/v1/users',{method:'POST',body:JSON.stringify({username:$('newUsername').value,email:$('newEmail').value,full_name:$('newFullName').value,password:$('newPassword').value})});await loadUsers();}
+async function createRole(){await request('/api/v1/roles',{method:'POST',body:JSON.stringify({code:$('roleCode').value,name:$('roleName').value,description:$('roleDesc').value})});await loadRoles();loadSelects();}
+async function createBinding(){await request('/api/v1/user-roles',{method:'POST',body:JSON.stringify({user:Number($('bindUser').value),role:Number($('bindRole').value),scope_type:$('bindScope').value})});await loadBindings();}
 async function changePassword(){await request('/api/v1/auth/change-password',{method:'POST',body:JSON.stringify({old_password:$('oldPwd').value,new_password:$('newPwd').value,new_password_confirm:$('newPwd2').value})});alert('密码修改成功');}
 
 function initTabs(){

@@ -10,10 +10,10 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User = get_user_model()
-        admin_role, _ = Role.objects.get_or_create(code='admin', defaults={'name': 'Admin', 'is_system': True})
-        pm_role, _ = Role.objects.get_or_create(code='pm', defaults={'name': 'Project Manager', 'is_system': True})
-        tester_role, _ = Role.objects.get_or_create(code='tester', defaults={'name': 'Tester', 'is_system': True})
-        qa_role, _ = Role.objects.get_or_create(code='qa', defaults={'name': 'QA', 'is_system': True})
+        admin_role, _ = Role.objects.get_or_create(code='ADMIN', defaults={'name': 'Admin', 'is_system': True})
+        pm_role, _ = Role.objects.get_or_create(code='PM', defaults={'name': 'Project Manager', 'is_system': True})
+        tester_role, _ = Role.objects.get_or_create(code='TESTER', defaults={'name': 'Tester', 'is_system': True})
+        qa_role, _ = Role.objects.get_or_create(code='QA', defaults={'name': 'QA', 'is_system': True})
 
         admin, _ = User.objects.get_or_create(username='admin', defaults={'email': 'admin@example.com', 'is_staff': True, 'is_superuser': True})
         admin.set_password('Admin123!')

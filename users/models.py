@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
@@ -6,6 +8,7 @@ from common.models import TimeStampedModel
 
 
 class User(AbstractUser, TimeStampedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=150, blank=True)
     is_active = models.BooleanField(default=True)
@@ -16,6 +19,7 @@ class User(AbstractUser, TimeStampedModel):
 
 
 class Role(TimeStampedModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)

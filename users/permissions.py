@@ -12,4 +12,4 @@ class IsPlatformAdmin(BasePermission):
             return False
         if user.is_superuser:
             return True
-        return UserRole.objects.filter(user=user, role__code='admin').exists()
+        return UserRole.objects.filter(user=user, role__code='ADMIN').exists()

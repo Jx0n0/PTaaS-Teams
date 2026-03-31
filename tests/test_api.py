@@ -23,8 +23,8 @@ class PlatformApiTest(APITestCase):
             is_active=True,
         )
 
-        self.admin_role = Role.objects.create(code='admin', name='Admin')
-        self.tester_role = Role.objects.create(code='tester', name='Tester')
+        self.admin_role, _ = Role.objects.get_or_create(code='ADMIN', defaults={'name': 'Admin'})
+        self.tester_role, _ = Role.objects.get_or_create(code='TESTER', defaults={'name': 'Tester'})
         UserRole.objects.create(user=self.admin_user, role=self.admin_role, scope_type=UserRole.ScopeType.GLOBAL)
         UserRole.objects.create(user=self.normal_user, role=self.tester_role, scope_type=UserRole.ScopeType.GLOBAL)
 
@@ -37,7 +37,7 @@ class PlatformApiTest(APITestCase):
         self.assertIn('access', resp.data)
         self.assertIn('refresh', resp.data)
         self.assertEqual(resp.data['user']['username'], 'tester')
-        self.assertIn('tester', resp.data['roles'])
+        self.assertIn('TESTER', resp.data['roles'])
 
     def test_me_returns_expected_fields(self):
         login = self._login('tester', 'OldPass123!')
@@ -79,17 +79,17 @@ class PlatformApiTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
 
         create_user = self.client.post(
-            '/api/v1/users/',
+            '/api/v1/users',
             {'username': 'pm1', 'email': 'pm1@test.com', 'full_name': 'PM 1', 'password': 'Pm123456!'},
             format='json',
         )
         self.assertEqual(create_user.status_code, status.HTTP_201_CREATED)
 
-        create_role = self.client.post('/api/v1/roles/', {'code': 'pm', 'name': 'Project Manager'}, format='json')
+        create_role = self.client.post('/api/v1/roles', {'code': 'PM', 'name': 'Project Manager'}, format='json')
         self.assertEqual(create_role.status_code, status.HTTP_201_CREATED)
 
         bind = self.client.post(
-            '/api/v1/user-roles/',
+            '/api/v1/user-roles',
             {'user': create_user.data['id'], 'role': create_role.data['id'], 'scope_type': 'GLOBAL'},
             format='json',
         )
@@ -99,8 +99,29 @@ class PlatformApiTest(APITestCase):
         login = self._login('tester', 'OldPass123!')
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
 
-        resp = self.client.get('/api/v1/users/')
+        resp = self.client.get('/api/v1/users')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+
+    def test_user_list_is_paginated_and_filterable(self):
+        login = self._login('platform_admin', 'Admin123!')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
+
+        resp = self.client.get('/api/v1/users?search=tester')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertIn('results', resp.data)
+        usernames = [x['username'] for x in resp.data['results']]
+        self.assertIn('tester', usernames)
+
+    def test_admin_can_reset_password(self):
+        login = self._login('platform_admin', 'Admin123!')
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {login.data['access']}")
+
+        resp = self.client.post(f'/api/v1/users/{self.normal_user.id}/reset-password', {'new_password': 'ResetPass123!'}, format='json')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+
+        relogin = self._login('tester', 'ResetPass123!')
+        self.assertEqual(relogin.status_code, status.HTTP_200_OK)
 
     def test_root_returns_frontend_landing_page(self):
         resp = self.client.get('/')

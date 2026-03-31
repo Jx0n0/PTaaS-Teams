@@ -3,10 +3,10 @@ from users.models import UserRole
 
 
 class ScopeService:
-    ADMIN_ROLE_CODE = 'admin'
-    PM_ROLE_CODE = 'pm'
-    TESTER_ROLE_CODE = 'tester'
-    QA_ROLE_CODE = 'qa'
+    ADMIN_ROLE_CODE = 'ADMIN'
+    PM_ROLE_CODE = 'PM'
+    TESTER_ROLE_CODE = 'TESTER'
+    QA_ROLE_CODE = 'QA'
 
     @classmethod
     def is_admin(cls, user):

@@ -9,7 +9,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'full_name', 'is_active', 'is_staff', 'password', 'roles', 'created_at', 'updated_at']
+        fields = [
+            'id', 'username', 'email', 'full_name', 'is_active', 'is_staff', 'is_superuser',
+            'password', 'roles', 'created_at', 'updated_at'
+        ]
         read_only_fields = ['created_at', 'updated_at']
 
     def create(self, validated_data):
@@ -21,6 +24,15 @@ class UserSerializer(serializers.ModelSerializer):
             user.set_unusable_password()
         user.save()
         return user
+
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for key, value in validated_data.items():
+            setattr(instance, key, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
 
     def get_roles(self, obj):
         return sorted(set(obj.user_roles.values_list('role__code', flat=True)))
@@ -53,3 +65,7 @@ class UserRoleSerializer(serializers.ModelSerializer):
         if scope_type == UserRole.ScopeType.PROJECT and not project:
             raise serializers.ValidationError('project is required for PROJECT scope')
         return attrs
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
