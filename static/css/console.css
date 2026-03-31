@@ -1,12 +1,14 @@
 body{margin:0;background:#f5f7fb;font-family:Inter,Arial}
-.shell{display:flex;min-height:100vh}.sider{width:280px;background:#001529;padding:16px;display:flex;flex-direction:column;gap:6px;overflow:auto}
+.shell{display:flex;min-height:100vh}.sider{width:290px;background:#001529;padding:16px;display:flex;flex-direction:column;gap:6px;overflow:auto}
 .brand{color:#fff;font-size:24px;font-weight:700;margin:8px 0 12px}
 .nav{background:#0b2240;color:#dbeafe;border:none;padding:8px 10px;border-radius:8px;text-align:left;cursor:pointer;font-size:13px}
-.nav.sub{font-size:12px;background:#102b4d}
+.nav.sub{font-size:12px;background:#102b4d}.nav.sub2{font-size:12px;background:#13345c;margin-left:12px}.nav.sub3{font-size:12px;background:#17406f;margin-left:24px}
 .nav.active{background:#1677ff;color:#fff}
-.menu-title{color:#93c5fd;font-size:12px;margin-top:8px;padding:2px 2px;text-transform:none}
-.menu-indent{padding-left:10px;display:flex;flex-direction:column;gap:5px}
+.group{display:flex;flex-direction:column;gap:5px;animation:fade .18s ease}
 .main{flex:1;padding:18px}.topbar{display:flex;justify-content:space-between;align-items:center}.topbar h2{margin:0}.topbar p{margin:0;color:#64748b}
-.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-top:14px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.card{background:#fff;padding:16px;border-radius:12px;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-top:14px}.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}.row-col{display:flex;flex-direction:column;gap:8px;margin:12px 0}
 input,select{padding:8px;border:1px solid #d1d5db;border-radius:8px;min-width:120px}.btn{background:#1677ff;color:#fff;border:none;border-radius:8px;padding:8px 12px;cursor:pointer}.btn.ghost{background:#fff;color:#111827;border:1px solid #d1d5db}
 .hidden{display:none}table{width:100%;border-collapse:collapse}th,td{padding:8px;border-bottom:1px solid #e5e7eb;text-align:left}pre{background:#0f172a;color:#f8fafc;border-radius:10px;padding:12px;overflow:auto}
+.user-menu-wrap{position:relative}.user-dropdown{position:absolute;right:0;top:42px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;box-shadow:0 8px 20px rgba(0,0,0,.1);min-width:140px;overflow:hidden;animation:fade .15s ease}.user-dropdown button{width:100%;padding:10px;border:none;background:#fff;text-align:left;cursor:pointer}.user-dropdown button:hover{background:#f3f4f6}
+.modal{position:fixed;inset:0;background:rgba(17,24,39,.55);display:flex;align-items:center;justify-content:center}.modal-content{width:420px;background:#fff;border-radius:12px;padding:16px}
+@keyframes fade{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}

@@ -35,13 +35,19 @@ class RefreshSerializer(TokenRefreshSerializer):
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
-    new_password_confirm = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
         user = self.context['request'].user
-        if not user.check_password(attrs['old_password']):
+        old_password = attrs.get('old_password')
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+
+        if not user.check_password(old_password):
             raise serializers.ValidationError({'old_password': 'Old password is incorrect.'})
-        if attrs['new_password'] != attrs['new_password_confirm']:
-            raise serializers.ValidationError({'new_password_confirm': 'Password confirmation does not match.'})
-        password_validation.validate_password(attrs['new_password'], user=user)
+        if not new_password:
+            raise serializers.ValidationError({'new_password': 'New password is required.'})
+        if new_password != confirm_password:
+            raise serializers.ValidationError({'confirm_password': 'Password confirmation does not match.'})
+        password_validation.validate_password(new_password, user=user)
         return attrs

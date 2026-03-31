@@ -4,14 +4,13 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from users.models import Role, User, UserRole
-from users.permissions import IsPlatformAdmin
+from users.permissions import AdminOnlyViewSetMixin
 from users.serializers import ResetPasswordSerializer, RoleSerializer, UserRoleSerializer, UserSerializer
 
 
-class UserViewSet(ModelViewSet):
+class UserViewSet(AdminOnlyViewSetMixin, ModelViewSet):
     queryset = User.objects.all().order_by('-created_at')
     serializer_class = UserSerializer
-    permission_classes = [IsPlatformAdmin]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -44,13 +43,11 @@ class UserViewSet(ModelViewSet):
         return Response({'message': 'Password reset successfully.'})
 
 
-class RoleViewSet(ModelViewSet):
+class RoleViewSet(AdminOnlyViewSetMixin, ModelViewSet):
     queryset = Role.objects.all().order_by('code')
     serializer_class = RoleSerializer
-    permission_classes = [IsPlatformAdmin]
 
 
-class UserRoleViewSet(ModelViewSet):
+class UserRoleViewSet(AdminOnlyViewSetMixin, ModelViewSet):
     queryset = UserRole.objects.select_related('user', 'role', 'customer', 'project').all().order_by('-created_at')
     serializer_class = UserRoleSerializer
-    permission_classes = [IsPlatformAdmin]

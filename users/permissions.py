@@ -1,10 +1,10 @@
-from rest_framework.permissions import BasePermission
+from rest_framework.permissions import BasePermission, IsAuthenticated
 
 from users.models import UserRole
 
 
 class IsPlatformAdmin(BasePermission):
-    """API-level platform admin permission (not dependent on Django admin site)."""
+    """Role-based admin gate for management APIs."""
 
     def has_permission(self, request, view):
         user = request.user
@@ -13,3 +13,11 @@ class IsPlatformAdmin(BasePermission):
         if user.is_superuser:
             return True
         return UserRole.objects.filter(user=user, role__code='ADMIN').exists()
+
+
+class IsAuthenticatedUser(IsAuthenticated):
+    """Semantic alias for endpoints open to any logged-in user."""
+
+
+class AdminOnlyViewSetMixin:
+    permission_classes = [IsPlatformAdmin]

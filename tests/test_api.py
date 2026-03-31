@@ -56,14 +56,14 @@ class PlatformApiTest(APITestCase):
 
         bad = self.client.post(
             '/api/v1/auth/change-password',
-            {'old_password': 'wrong', 'new_password': 'NewPass123!', 'new_password_confirm': 'NewPass123!'},
+            {'old_password': 'wrong', 'new_password': 'NewPass123!', 'confirm_password': 'NewPass123!'},
             format='json',
         )
         self.assertEqual(bad.status_code, status.HTTP_400_BAD_REQUEST)
 
         ok = self.client.post(
             '/api/v1/auth/change-password',
-            {'old_password': 'OldPass123!', 'new_password': 'NewPass123!', 'new_password_confirm': 'NewPass123!'},
+            {'old_password': 'OldPass123!', 'new_password': 'NewPass123!', 'confirm_password': 'NewPass123!'},
             format='json',
         )
         self.assertEqual(ok.status_code, status.HTTP_200_OK)

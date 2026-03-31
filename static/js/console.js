@@ -25,35 +25,64 @@ async function login(){
 }
 
 const listData=(payload)=>Array.isArray(payload)?payload:(payload.results||[]);
-async function loadMe(){ $('meBox').textContent=JSON.stringify(await request('/api/v1/auth/me'),null,2); }
+async function loadMe(){
+  const me = await request('/api/v1/auth/me');
+  $('meBox').textContent=JSON.stringify(me,null,2);
+  $('currentUsername').textContent = me.username;
+}
 async function loadUsers(){ const ds=listData(await request('/api/v1/users')); $('usersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.username}</td><td>${x.email||''}</td><td>${(x.roles||[]).join(',')}</td></tr>`).join(''); }
 async function loadRoles(){ const ds=listData(await request('/api/v1/roles')); $('rolesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.code}</td><td>${x.name}</td><td>${x.description||''}</td></tr>`).join(''); }
 
 async function createUser(){await request('/api/v1/users',{method:'POST',body:JSON.stringify({username:$('newUsername').value,email:$('newEmail').value,full_name:$('newFullName').value,password:$('newPassword').value})});await loadUsers();}
 async function createRole(){await request('/api/v1/roles',{method:'POST',body:JSON.stringify({code:$('roleCode').value,name:$('roleName').value,description:$('roleDesc').value})});await loadRoles();}
-async function changePassword(){await request('/api/v1/auth/change-password',{method:'POST',body:JSON.stringify({old_password:$('oldPwd').value,new_password:$('newPwd').value,new_password_confirm:$('newPwd2').value})});alert('密码修改成功');}
+async function changePassword(){
+  await request('/api/v1/auth/change-password',{method:'POST',body:JSON.stringify({old_password:$('oldPwd').value,new_password:$('newPwd').value,confirm_password:$('confirmPwd').value})});
+  alert('密码修改成功');
+  closePwdModal();
+}
 
-function initTabs(){
-  const map={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab',security:'securityTab'};
-  document.querySelectorAll('.nav').forEach(btn=>btn.onclick=()=>{
-    document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
-    btn.classList.add('active');
-    ['dashboardTab','usersTab','rolesTab','securityTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
-    if(btn.dataset.implemented==='1') {
-      $(map[btn.dataset.tab]).classList.remove('hidden');
-    } else {
-      $('placeholderTitle').textContent = btn.dataset.title || '功能待开发';
-      $('placeholderTab').classList.remove('hidden');
-    }
+function showTab(target, title){
+  ['dashboardTab','usersTab','rolesTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
+  if (target) {
+    $(target).classList.remove('hidden');
+  } else {
+    $('placeholderTitle').textContent = title || '功能待开发';
+    $('placeholderTab').classList.remove('hidden');
+  }
+}
+
+function initNav(){
+  const itemMap={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab'};
+  document.querySelectorAll('.nav.item, .nav.sub, .nav.sub2, .nav.sub3').forEach(btn=>{
+    btn.onclick=()=>{
+      document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active');
+      if(btn.dataset.implemented==='1') showTab(itemMap[btn.dataset.tab], btn.dataset.title);
+      else showTab(null, btn.dataset.title);
+    };
+  });
+
+  document.querySelectorAll('.group-toggle').forEach(btn=>{
+    btn.onclick=()=>{
+      const group = $(`group-${btn.dataset.group}`);
+      group.classList.toggle('hidden');
+    };
   });
 }
 
+function toggleUserDropdown(){ $('userDropdown').classList.toggle('hidden'); }
+function openPwdModal(){ $('pwdModal').classList.remove('hidden'); $('userDropdown').classList.add('hidden'); }
+function closePwdModal(){ $('pwdModal').classList.add('hidden'); }
 function logout(){localStorage.clear();location.reload();}
 
 $('loginBtn').onclick=login;
 $('createUserBtn').onclick=createUser;
 $('createRoleBtn').onclick=createRole;
-$('pwdBtn').onclick=changePassword;
+$('submitPwdBtn').onclick=changePassword;
+$('closePwdModalBtn').onclick=closePwdModal;
+$('openPwdModalBtn').onclick=openPwdModal;
 $('logoutBtn').onclick=logout;
-initTabs();
+$('userMenuBtn').onclick=toggleUserDropdown;
+initNav();
+
 if(access){$('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');Promise.all([loadMe(),loadUsers(),loadRoles()]);}
