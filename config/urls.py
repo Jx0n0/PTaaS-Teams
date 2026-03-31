@@ -5,7 +5,7 @@ from rest_framework.routers import DefaultRouter
 from config.views import root_landing
 from users.auth_views import ChangePasswordView, LoginView, MeView, RefreshView
 from users.views import RoleViewSet, UserRoleViewSet, UserViewSet
-from business.views import AssetViewSet, BatchViewSet, CustomerViewSet, ProjectViewSet, ReportTemplateViewSet, ReportViewSet
+from business.views import AssetViewSet, BatchViewSet, CustomerViewSet, FindingViewSet, HistoryFindingViewSet, ProjectViewSet, ReportTemplateViewSet, ReportViewSet, ScanFileViewSet
 
 router = DefaultRouter(trailing_slash=False)
 router.register(r'users', UserViewSet, basename='user')
@@ -15,6 +15,9 @@ router.register(r'customers', CustomerViewSet, basename='customer')
 router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'assets', AssetViewSet, basename='asset')
 router.register(r'batches', BatchViewSet, basename='batch')
+router.register(r'scan-files', ScanFileViewSet, basename='scan-file')
+router.register(r'findings', FindingViewSet, basename='finding')
+router.register(r'history-findings', HistoryFindingViewSet, basename='history-finding')
 router.register(r'report-templates', ReportTemplateViewSet, basename='report-template')
 router.register(r'reports', ReportViewSet, basename='report')
 

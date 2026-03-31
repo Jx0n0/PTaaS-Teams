@@ -133,34 +133,6 @@ class Migration(migrations.Migration):
             ),
         ),
         migrations.AlterField(
-            model_name="asset",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
-            ),
-        ),
-        migrations.AlterField(
-            model_name="batch",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
-            ),
-        ),
-        migrations.AlterField(
-            model_name="customer",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
-            ),
-        ),
-        migrations.AlterField(
-            model_name="project",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
-            ),
-        ),
-        migrations.AlterField(
             model_name="project",
             name="status",
             field=models.CharField(
@@ -187,20 +159,6 @@ class Migration(migrations.Migration):
                 ],
                 default="web",
                 max_length=20,
-            ),
-        ),
-        migrations.AlterField(
-            model_name="report",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
-            ),
-        ),
-        migrations.AlterField(
-            model_name="reporttemplate",
-            name="id",
-            field=models.UUIDField(
-                default=uuid.uuid4, editable=False, primary_key=True, serialize=False
             ),
         ),
         migrations.AddIndex(

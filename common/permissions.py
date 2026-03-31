@@ -1,4 +1,4 @@
-from business.models import Asset, Batch, Customer, Project
+from business.models import Asset, Batch, Customer, Finding, HistoryFinding, Project, ScanFile
 from users.models import UserRole
 
 
@@ -26,33 +26,20 @@ class ScopeService:
     def customer_ids(cls, user):
         roles = cls.role_queryset(user)
         direct = roles.filter(scope_type=UserRole.ScopeType.CUSTOMER).values_list('customer_id', flat=True)
-        project_based = Project.objects.filter(
-            id__in=roles.filter(scope_type=UserRole.ScopeType.PROJECT).values_list('project_id', flat=True)
-        ).values_list('customer_id', flat=True)
+        project_based = Project.objects.filter(id__in=roles.filter(scope_type=UserRole.ScopeType.PROJECT).values_list('project_id', flat=True)).values_list('customer_id', flat=True)
         return set(direct).union(set(project_based))
 
     @classmethod
     def project_ids(cls, user):
         roles = cls.role_queryset(user)
         direct = roles.filter(scope_type=UserRole.ScopeType.PROJECT).values_list('project_id', flat=True)
-        via_customer = Project.objects.filter(
-            customer_id__in=roles.filter(scope_type=UserRole.ScopeType.CUSTOMER).values_list('customer_id', flat=True)
-        ).values_list('id', flat=True)
+        via_customer = Project.objects.filter(customer_id__in=roles.filter(scope_type=UserRole.ScopeType.CUSTOMER).values_list('customer_id', flat=True)).values_list('id', flat=True)
         return set(direct).union(set(via_customer))
-
-    @classmethod
-    def can_manage_customer_project(cls, user):
-        return cls.is_admin(user) or cls.has_role(user, [cls.PM_ROLE_CODE])
-
-    @classmethod
-    def can_manage_asset_batch(cls, user):
-        return cls.is_admin(user) or cls.has_role(user, [cls.PM_ROLE_CODE, cls.TESTER_ROLE_CODE])
 
     @classmethod
     def filter_queryset(cls, user, queryset):
         if cls.is_admin(user):
             return queryset
-
         model = queryset.model
         customer_ids = cls.customer_ids(user)
         project_ids = cls.project_ids(user)
@@ -64,18 +51,31 @@ class ScopeService:
             return queryset.filter(project_id__in=project_ids)
         if model is Batch:
             return queryset.filter(asset__project_id__in=project_ids)
+        if model is ScanFile:
+            return queryset.filter(batch__asset__project_id__in=project_ids)
+        if model is Finding:
+            return queryset.filter(asset__project_id__in=project_ids)
+        if model is HistoryFinding:
+            return queryset.filter(asset__project_id__in=project_ids)
         return queryset.none()
 
     @classmethod
     def can_access_obj(cls, user, obj):
         if cls.is_admin(user):
             return True
+        project_ids = cls.project_ids(user)
         if isinstance(obj, Customer):
             return obj.id in cls.customer_ids(user)
         if isinstance(obj, Project):
-            return obj.id in cls.project_ids(user)
+            return obj.id in project_ids
         if isinstance(obj, Asset):
-            return obj.project_id in cls.project_ids(user)
+            return obj.project_id in project_ids
         if isinstance(obj, Batch):
-            return obj.asset.project_id in cls.project_ids(user)
+            return obj.asset.project_id in project_ids
+        if isinstance(obj, ScanFile):
+            return obj.batch.asset.project_id in project_ids
+        if isinstance(obj, Finding):
+            return obj.asset.project_id in project_ids
+        if isinstance(obj, HistoryFinding):
+            return obj.asset.project_id in project_ids
         return False

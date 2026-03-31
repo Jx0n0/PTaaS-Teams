@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import Role, UserRole
-from business.models import Asset, Customer, Project, ProjectMember
+from business.models import Asset, Batch, Customer, Finding, HistoryFinding, Project, ProjectMember
 
 
 class PlatformApiTest(APITestCase):
@@ -196,3 +196,41 @@ class ProjectAssetVisibilityTest(APITestCase):
         self.assertEqual(a_resp.status_code, status.HTTP_200_OK)
         self.assertEqual(a_resp.data['count'], 1)
         self.assertEqual(a_resp.data['results'][0]['name'], 'asset-1')
+
+
+class BatchFindingApiTest(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.pm = User.objects.create_user(username='pmx', email='pmx@test.com', password='Pm123456!')
+        self.tester = User.objects.create_user(username='tx', email='tx@test.com', password='Tester123!')
+        self.qa = User.objects.create_user(username='qax', email='qax@test.com', password='Qa123456!')
+        pm_role, _ = Role.objects.get_or_create(code='PM', defaults={'name': 'PM'})
+        tester_role, _ = Role.objects.get_or_create(code='TESTER', defaults={'name': 'Tester'})
+        qa_role, _ = Role.objects.get_or_create(code='QA', defaults={'name': 'QA'})
+        UserRole.objects.create(user=self.pm, role=pm_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.tester, role=tester_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.qa, role=qa_role, scope_type=UserRole.ScopeType.GLOBAL)
+
+        self.customer = Customer.objects.create(name='C1', code='c1')
+        self.project = Project.objects.create(customer=self.customer, name='Proj', code='proj', project_manager=self.pm, created_by=self.pm)
+        ProjectMember.objects.create(project=self.project, user=self.tester, member_type=ProjectMember.MemberType.TESTER)
+        ProjectMember.objects.create(project=self.project, user=self.qa, member_type=ProjectMember.MemberType.QA)
+        self.asset = Asset.objects.create(project=self.project, name='a1', asset_type=Asset.AssetType.HOST)
+
+    def _token(self, username, password):
+        return self.client.post('/api/v1/auth/login', {'username': username, 'password': password}, format='json').data['access']
+
+    def test_tester_can_create_batch_and_qa_readonly_finding(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('tx', 'Tester123!')}")
+        b = self.client.post('/api/v1/batches', {'asset_id': str(self.asset.id), 'name': 'B1', 'batch_no': '2026-001', 'status': 'testing'}, format='json')
+        self.assertEqual(b.status_code, status.HTTP_201_CREATED)
+
+        f = self.client.post('/api/v1/findings', {'asset_id': str(self.asset.id), 'batch_id': b.data['id'], 'title': 'XSS', 'severity': 'high', 'status': 'open'}, format='json')
+        self.assertEqual(f.status_code, status.HTTP_201_CREATED)
+
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('qax', 'Qa123456!')}")
+        ro = self.client.patch(f"/api/v1/findings/{f.data['id']}", {'status': 'fixed'}, format='json')
+        self.assertEqual(ro.status_code, status.HTTP_403_FORBIDDEN)
+
+        hist = self.client.get(f"/api/v1/history-findings?asset_id={self.asset.id}")
+        self.assertEqual(hist.status_code, status.HTTP_200_OK)

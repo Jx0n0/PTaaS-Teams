@@ -16,7 +16,7 @@ class IsAdminOrPMWriteElseReadOnly(BasePermission):
         return UserRole.objects.filter(user=user, role__code__in=['ADMIN', 'PM']).exists()
 
 
-class IsProjectAssetWriteAllowed(BasePermission):
+class IsScopedProjectWritePermission(BasePermission):
     def has_permission(self, request, view):
         user = request.user
         if not user or not user.is_authenticated:

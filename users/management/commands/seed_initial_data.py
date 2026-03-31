@@ -34,7 +34,7 @@ class Command(BaseCommand):
         customer, _ = Customer.objects.get_or_create(code='acme', defaults={'name': 'ACME Corp'})
         project, _ = Project.objects.get_or_create(customer=customer, code='web-2026', defaults={'name': 'Web Pentest 2026'})
         asset, _ = Asset.objects.get_or_create(project=project, name='Main Domain', defaults={'asset_type': Asset.AssetType.DOMAIN, 'fqdn': 'acme.com', 'environment': Asset.Environment.PROD})
-        Batch.objects.get_or_create(asset=asset, name='Q1 Full Scan')
+        Batch.objects.get_or_create(asset=asset, batch_no='2026-Q1', defaults={'name': 'Q1 Full Scan', 'status': 'testing'})
 
         UserRole.objects.get_or_create(user=admin, role=admin_role, scope_type=UserRole.ScopeType.GLOBAL)
         UserRole.objects.get_or_create(user=pm, role=pm_role, scope_type=UserRole.ScopeType.PROJECT, project=project)
