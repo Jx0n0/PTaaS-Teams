@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from business.models import Asset, Batch, Customer, Project, Report, ReportTemplate
+from business.models import Asset, Batch, Customer, Project, ProjectMember, Report, ReportTemplate
 
 
 @admin.register(Customer)
@@ -10,14 +10,20 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    list_display = ('id', 'code', 'name', 'customer', 'test_type', 'status', 'is_active')
+    list_display = ('id', 'code', 'name', 'customer', 'test_type', 'status', 'project_manager', 'is_active')
     list_filter = ('customer', 'status', 'test_type')
+
+
+@admin.register(ProjectMember)
+class ProjectMemberAdmin(admin.ModelAdmin):
+    list_display = ('id', 'project', 'user', 'member_type', 'created_at')
+    list_filter = ('member_type',)
 
 
 @admin.register(Asset)
 class AssetAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'asset_type', 'project', 'criticality', 'is_active')
-    list_filter = ('asset_type', 'project')
+    list_display = ('id', 'name', 'asset_type', 'project', 'environment', 'owner', 'is_active')
+    list_filter = ('asset_type', 'project', 'environment')
 
 
 @admin.register(Batch)

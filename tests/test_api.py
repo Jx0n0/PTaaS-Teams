@@ -3,6 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import Role, UserRole
+from business.models import Asset, Customer, Project, ProjectMember
 
 
 class PlatformApiTest(APITestCase):
@@ -152,3 +153,46 @@ class CustomerProjectModuleTest(APITestCase):
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('tester2', 'Tester123!')}")
         resp = self.client.post('/api/v1/customers', {'name': 'Bad', 'code': 'bad'}, format='json')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
+
+
+class ProjectAssetVisibilityTest(APITestCase):
+    def setUp(self):
+        User = get_user_model()
+        self.admin = User.objects.create_user(username='admin1', email='admin1@test.com', password='Admin123!')
+        self.tester = User.objects.create_user(username='tester3', email='tester3@test.com', password='Tester123!')
+        self.other = User.objects.create_user(username='tester4', email='tester4@test.com', password='Tester123!')
+
+        admin_role, _ = Role.objects.get_or_create(code='ADMIN', defaults={'name': 'Admin'})
+        tester_role, _ = Role.objects.get_or_create(code='TESTER', defaults={'name': 'Tester'})
+        UserRole.objects.create(user=self.admin, role=admin_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.tester, role=tester_role, scope_type=UserRole.ScopeType.GLOBAL)
+        UserRole.objects.create(user=self.other, role=tester_role, scope_type=UserRole.ScopeType.GLOBAL)
+
+        self.customer = Customer.objects.create(name='Acme', code='acme')
+        self.p1 = Project.objects.create(customer=self.customer, name='P1', code='p1', created_by=self.admin)
+        self.p2 = Project.objects.create(customer=self.customer, name='P2', code='p2', created_by=self.admin)
+
+        ProjectMember.objects.create(project=self.p1, user=self.tester, member_type=ProjectMember.MemberType.TESTER)
+        Asset.objects.create(project=self.p1, name='asset-1', asset_type=Asset.AssetType.HOST)
+        Asset.objects.create(project=self.p2, name='asset-2', asset_type=Asset.AssetType.HOST)
+
+    def _token(self, username, password):
+        return self.client.post('/api/v1/auth/login', {'username': username, 'password': password}, format='json').data['access']
+
+    def test_admin_can_see_all_projects(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('admin1', 'Admin123!')}")
+        resp = self.client.get('/api/v1/projects')
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(resp.data['count'], 2)
+
+    def test_tester_only_sees_assigned_projects_and_assets(self):
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self._token('tester3', 'Tester123!')}")
+        p_resp = self.client.get('/api/v1/projects')
+        self.assertEqual(p_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(p_resp.data['count'], 1)
+        self.assertEqual(p_resp.data['results'][0]['code'], 'p1')
+
+        a_resp = self.client.get('/api/v1/assets')
+        self.assertEqual(a_resp.status_code, status.HTTP_200_OK)
+        self.assertEqual(a_resp.data['count'], 1)
+        self.assertEqual(a_resp.data['results'][0]['name'], 'asset-1')

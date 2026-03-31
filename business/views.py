@@ -1,24 +1,29 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Exists, OuterRef, Q
 from django.http import FileResponse, Http404
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-from business.models import Asset, Batch, Customer, Project, Report, ReportTemplate
-from business.permissions import IsAdminOrPMWriteElseReadOnly, IsPMOnlyForReportGenerate
+from business.models import Asset, Batch, Customer, Project, ProjectMember, Report, ReportTemplate
+from business.permissions import IsAdminOrPMWriteElseReadOnly, IsPMOnlyForReportGenerate, IsProjectAssetWriteAllowed
 from business.serializers import (
-    AssetSerializer,
+    AssetDetailSerializer,
+    AssetListSerializer,
+    AssetWriteSerializer,
     BatchSerializer,
     CustomerDetailSerializer,
     CustomerSerializer,
-    ProjectSerializer,
+    ProjectDetailSerializer,
+    ProjectListSerializer,
+    ProjectWriteSerializer,
     ReportGenerateSerializer,
     ReportSerializer,
     ReportTemplateSerializer,
 )
 from common.api_permissions import IsScopedObjectAccessible
 from common.permissions import ScopeService
+from users.models import UserRole
 
 
 class ScopedModelViewSet(ModelViewSet):
@@ -26,6 +31,25 @@ class ScopedModelViewSet(ModelViewSet):
 
     def get_queryset(self):
         return ScopeService.filter_queryset(self.request.user, super().get_queryset())
+
+
+def visible_projects_queryset(user):
+    qs = Project.objects.select_related('customer', 'project_manager', 'created_by').prefetch_related('members__user')
+    if ScopeService.is_admin(user):
+        return qs
+
+    member_sq = ProjectMember.objects.filter(project_id=OuterRef('id'), user=user)
+    role_codes = set(UserRole.objects.filter(user=user).values_list('role__code', flat=True))
+
+    scoped_project_ids = ScopeService.project_ids(user)
+
+    if 'PM' in role_codes:
+        return qs.filter(Q(project_manager=user) | Exists(member_sq) | Q(id__in=scoped_project_ids)).distinct()
+
+    if 'TESTER' in role_codes or 'QA' in role_codes:
+        return qs.filter(Q(id__in=scoped_project_ids) | Exists(member_sq)).distinct()
+
+    return qs.none()
 
 
 class CustomerViewSet(ScopedModelViewSet):
@@ -56,31 +80,87 @@ class CustomerViewSet(ScopedModelViewSet):
         return Response(serializer.data)
 
 
-class ProjectViewSet(ScopedModelViewSet):
-    queryset = Project.objects.select_related('customer').all()
-    serializer_class = ProjectSerializer
+class ProjectViewSet(ModelViewSet):
+    queryset = Project.objects.none()
     permission_classes = [IsAdminOrPMWriteElseReadOnly, IsScopedObjectAccessible]
 
     def get_queryset(self):
-        qs = super().get_queryset().annotate(
+        qs = visible_projects_queryset(self.request.user).annotate(
             asset_count=Count('assets', distinct=True),
             batch_count=Count('assets__batches', distinct=True),
+            finding_count=Count('assets__reports', distinct=True),
+            open_finding_count=Count('assets__reports', filter=~Q(assets__reports__status=Report.Status.SENT), distinct=True),
         )
-        customer_id = self.request.query_params.get('customer_id')
-        status = self.request.query_params.get('status')
-        if customer_id:
+
+        if customer_id := self.request.query_params.get('customer_id'):
             qs = qs.filter(customer_id=customer_id)
-        if status:
+        if status := self.request.query_params.get('status'):
             qs = qs.filter(status=status)
-        return qs
+        if test_type := self.request.query_params.get('test_type'):
+            qs = qs.filter(test_type=test_type)
+        if project_manager := self.request.query_params.get('project_manager'):
+            qs = qs.filter(project_manager_id=project_manager)
+        if search := self.request.query_params.get('search'):
+            qs = qs.filter(Q(name__icontains=search) | Q(code__icontains=search))
+        return qs.order_by('-created_at')
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ProjectListSerializer
+        if self.action == 'retrieve':
+            return ProjectDetailSerializer
+        return ProjectWriteSerializer
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
 
+    @action(detail=True, methods=['get'], url_path='assets')
+    def assets(self, request, pk=None):
+        project = self.get_object()
+        qs = Asset.objects.filter(project=project).select_related('project', 'project__customer').annotate(
+            batch_count=Count('batches', distinct=True),
+            finding_count=Count('reports', distinct=True),
+        ).order_by('-created_at')
+        page = self.paginate_queryset(qs)
+        serializer = AssetListSerializer(page if page is not None else qs, many=True)
+        if page is not None:
+            return self.get_paginated_response(serializer.data)
+        return Response(serializer.data)
 
-class AssetViewSet(ScopedModelViewSet):
-    queryset = Asset.objects.select_related('project', 'project__customer').all()
-    serializer_class = AssetSerializer
+
+class AssetViewSet(ModelViewSet):
+    queryset = Asset.objects.none()
+    permission_classes = [IsProjectAssetWriteAllowed, IsScopedObjectAccessible]
+
+    def get_queryset(self):
+        project_ids = visible_projects_queryset(self.request.user).values_list('id', flat=True)
+        qs = Asset.objects.filter(project_id__in=project_ids).select_related('project', 'project__customer').annotate(
+            batch_count=Count('batches', distinct=True),
+            finding_count=Count('reports', distinct=True),
+            scan_file_count=Count('batches', distinct=True),
+            history_finding_count=Count('reports', distinct=True),
+        )
+        if project_id := self.request.query_params.get('project_id'):
+            qs = qs.filter(project_id=project_id)
+        if asset_type := self.request.query_params.get('asset_type'):
+            qs = qs.filter(asset_type=asset_type)
+        if environment := self.request.query_params.get('environment'):
+            qs = qs.filter(environment=environment)
+        if search := self.request.query_params.get('search'):
+            qs = qs.filter(
+                Q(name__icontains=search)
+                | Q(ip_address__icontains=search)
+                | Q(fqdn__icontains=search)
+                | Q(url__icontains=search)
+            )
+        return qs.order_by('-created_at')
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return AssetListSerializer
+        if self.action == 'retrieve':
+            return AssetDetailSerializer
+        return AssetWriteSerializer
 
 
 class BatchViewSet(ScopedModelViewSet):
