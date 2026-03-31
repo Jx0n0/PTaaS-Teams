@@ -20,7 +20,7 @@ async function login(){
   try{
     const data=await request('/api/v1/auth/login',{method:'POST',body:JSON.stringify({username:$('username').value,password:$('password').value})});
     access=data.access;refresh=data.refresh;localStorage.setItem('access',access);localStorage.setItem('refresh',refresh);
-    $('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');await Promise.all([loadMe(),loadUsers(),loadRoles()]);
+    $('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');await Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects()]);
   }catch{ $('loginMsg').innerText='登录失败，请检查用户名密码'; }
 }
 
@@ -32,6 +32,8 @@ async function loadMe(){
 }
 async function loadUsers(){ const ds=listData(await request('/api/v1/users')); $('usersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.username}</td><td>${x.email||''}</td><td>${(x.roles||[]).join(',')}</td></tr>`).join(''); }
 async function loadRoles(){ const ds=listData(await request('/api/v1/roles')); $('rolesBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.code}</td><td>${x.name}</td><td>${x.description||''}</td></tr>`).join(''); }
+async function loadCustomers(){ const ds=listData(await request('/api/v1/customers')); $('customersBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.code||''}</td><td>${x.status||''}</td><td>${x.project_count ?? ''}</td></tr>`).join(''); }
+async function loadProjects(){ const ds=listData(await request('/api/v1/projects')); $('projectsBody').innerHTML=ds.map(x=>`<tr><td>${x.id}</td><td>${x.name||''}</td><td>${x.customer||''}</td><td>${x.test_type||''}</td><td>${x.status||''}</td></tr>`).join(''); }
 
 async function createUser(){await request('/api/v1/users',{method:'POST',body:JSON.stringify({username:$('newUsername').value,email:$('newEmail').value,full_name:$('newFullName').value,password:$('newPassword').value})});await loadUsers();}
 async function createRole(){await request('/api/v1/roles',{method:'POST',body:JSON.stringify({code:$('roleCode').value,name:$('roleName').value,description:$('roleDesc').value})});await loadRoles();}
@@ -42,7 +44,7 @@ async function changePassword(){
 }
 
 function showTab(target, title){
-  ['dashboardTab','usersTab','rolesTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
+  ['dashboardTab','usersTab','rolesTab','customersTab','projectsTab','placeholderTab'].forEach(id=>$(id).classList.add('hidden'));
   if (target) {
     $(target).classList.remove('hidden');
   } else {
@@ -52,7 +54,7 @@ function showTab(target, title){
 }
 
 function initNav(){
-  const itemMap={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab'};
+  const itemMap={dashboard:'dashboardTab',users:'usersTab',roles:'rolesTab',customers:'customersTab',projects:'projectsTab'};
   document.querySelectorAll('.nav.item, .nav.sub, .nav.sub2, .nav.sub3').forEach(btn=>{
     btn.onclick=()=>{
       document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));
@@ -85,4 +87,4 @@ $('logoutBtn').onclick=logout;
 $('userMenuBtn').onclick=toggleUserDropdown;
 initNav();
 
-if(access){$('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');Promise.all([loadMe(),loadUsers(),loadRoles()]);}
+if(access){$('loginPanel').classList.add('hidden');$('appPanel').classList.remove('hidden');Promise.all([loadMe(),loadUsers(),loadRoles(),loadCustomers(),loadProjects()]);}

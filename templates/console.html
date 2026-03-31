@@ -16,7 +16,7 @@
 
       <button class="nav group-toggle" data-group="client">客户管理</button>
       <div class="group hidden" id="group-client">
-        <button class="nav sub" data-title="Client List">客户列表</button>
+        <button class="nav sub item" data-tab="customers" data-title="客户管理" data-implemented="1">客户列表</button>
         <button class="nav sub" data-title="Client Detail">客户详情</button>
         <button class="nav sub2" data-title="Projects">项目</button>
         <button class="nav sub2" data-title="Report Templates">报告模板</button>
@@ -25,7 +25,7 @@
 
       <button class="nav group-toggle" data-group="projects">项目管理</button>
       <div class="group hidden" id="group-projects">
-        <button class="nav sub" data-title="Project List">项目列表</button>
+        <button class="nav sub item" data-tab="projects" data-title="项目管理" data-implemented="1">项目列表</button>
         <button class="nav sub" data-title="Project Detail">项目详情</button>
         <button class="nav sub2" data-title="Asset List">资产列表</button>
         <button class="nav sub2" data-title="Asset Detail">资产详情</button>
@@ -129,6 +129,16 @@
           <table><thead><tr><th>ID</th><th>编码</th><th>名称</th><th>描述</th></tr></thead><tbody id="rolesBody"></tbody></table>
         </div>
 
+
+        <div class="card hidden" id="customersTab">
+          <h3>客户管理</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>编码</th><th>状态</th><th>项目数</th></tr></thead><tbody id="customersBody"></tbody></table>
+        </div>
+
+        <div class="card hidden" id="projectsTab">
+          <h3>项目管理</h3>
+          <table><thead><tr><th>ID</th><th>名称</th><th>客户ID</th><th>类型</th><th>状态</th></tr></thead><tbody id="projectsBody"></tbody></table>
+        </div>
         <div class="card hidden" id="placeholderTab">
           <h3 id="placeholderTitle">功能待开发</h3>
           <p>该功能已预留导航入口，后续阶段逐步实现。</p>
