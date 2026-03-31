@@ -31,8 +31,18 @@ Provide an API-first internal operations console for platform base capabilities:
 - `GET/POST /api/v1/user-roles/`
 
 ## Run
+### Backend only (default, no Node image pull)
 ```bash
 docker compose up --build
 ```
-- Backend: `http://localhost:8000`
+- Backend API: `http://localhost:8000`
+
+### Backend + Frontend (requires network access to pull Node base image)
+```bash
+docker compose --profile frontend up --build
+```
+- Backend API: `http://localhost:8000`
 - Frontend: `http://localhost:5173`
+
+## Why frontend is optional profile
+Some restricted environments cannot reach Docker Hub to pull `node:20-alpine`. Making frontend service profile-gated keeps backend boot reliable.

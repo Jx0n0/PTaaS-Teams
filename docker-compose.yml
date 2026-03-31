@@ -1,4 +1,3 @@
-version: '3.9'
 services:
   db:
     image: postgres:16
@@ -30,6 +29,7 @@ services:
       - db
 
   frontend:
+    profiles: ["frontend"]
     build:
       context: ./frontend
     ports:
