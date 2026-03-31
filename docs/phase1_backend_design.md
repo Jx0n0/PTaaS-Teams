@@ -2,7 +2,7 @@
 
 ## User Model (Custom)
 `users.User` is a custom auth model (not Django default extension-only pattern), with:
-- `id` (UUID primary key)
+- `id` (primary key)
 - `username` (unique)
 - `email` (unique)
 - `full_name`
@@ -12,7 +12,7 @@
 
 ## Role Model
 `users.Role` is independent (not Django Group), with:
-- `id` (UUID primary key)
+- `id` (primary key)
 - `code` (unique: `ADMIN`, `PM`, `TESTER`, `QA`)
 - `name`
 - `description`

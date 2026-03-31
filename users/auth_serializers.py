@@ -4,7 +4,7 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 
 
 class AuthUserSerializer(serializers.Serializer):
-    id = serializers.UUIDField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
     email = serializers.EmailField(read_only=True)
     full_name = serializers.CharField(read_only=True)
