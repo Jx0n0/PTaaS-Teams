@@ -1,8 +1,8 @@
 from django.contrib import admin
-from django.http import JsonResponse
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
+from config.views import root_landing
 from users.auth_views import ChangePasswordView, LoginView, MeView, RefreshView
 from users.views import RoleViewSet, UserRoleViewSet, UserViewSet
 from business.views import AssetViewSet, BatchViewSet, CustomerViewSet, ProjectViewSet
@@ -16,13 +16,8 @@ router.register(r'projects', ProjectViewSet, basename='project')
 router.register(r'assets', AssetViewSet, basename='asset')
 router.register(r'batches', BatchViewSet, basename='batch')
 
-
-def root_api(_request):
-    return JsonResponse({'service': 'PTaaS Teams API', 'version': 'v1', 'status': 'ok'})
-
-
 urlpatterns = [
-    path('', root_api),
+    path('', root_landing),
     path('admin/', admin.site.urls),
     path('api/v1/auth/login', LoginView.as_view(), name='auth_login'),
     path('api/v1/auth/refresh', RefreshView.as_view(), name='auth_refresh'),

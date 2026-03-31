@@ -46,3 +46,8 @@ docker compose --profile frontend up --build
 
 ## Why frontend is optional profile
 Some restricted environments cannot reach Docker Hub to pull `node:20-alpine`. Making frontend service profile-gated keeps backend boot reliable.
+
+
+## Access notes
+- `http://localhost:8000/` shows a launcher page (backend landing) with a direct link to frontend.
+- `http://localhost:5173/` is the actual Ant Design SPA.

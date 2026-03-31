@@ -102,7 +102,7 @@ class PlatformApiTest(APITestCase):
         resp = self.client.get('/api/v1/users/')
         self.assertEqual(resp.status_code, status.HTTP_403_FORBIDDEN)
 
-    def test_root_returns_api_status(self):
+    def test_root_returns_frontend_landing_page(self):
         resp = self.client.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertEqual(resp.data['status'], 'ok')
+        self.assertIn('PTaaS Teams 平台入口', resp.content.decode('utf-8'))
