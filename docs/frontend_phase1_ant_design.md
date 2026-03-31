@@ -12,14 +12,8 @@ In restricted environments, pulling `node:20-alpine` often fails. To ensure fron
 - Change password
 
 ## Run
-### Backend only
 ```bash
 docker compose up --build
-```
-
-### Backend + Frontend
-```bash
-docker compose --profile frontend up --build
 ```
 
 - Backend API: `http://localhost:8000`
@@ -30,4 +24,4 @@ docker compose --profile frontend up --build
 - `http://localhost:5173/` shows interactive frontend console page.
 
 ## Implementation note
-Frontend container now uses `python:3.12-slim` and serves `frontend/dist` directly, removing Node image dependency.
+Frontend container uses `python:3.12-slim` and serves `frontend/dist` directly, removing Node image dependency.

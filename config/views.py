@@ -26,7 +26,7 @@ def root_landing(_request):
     <div class='card'>
       <h1>PTaaS Teams 平台入口</h1>
       <p>你访问的是后端服务端口 <code>:8000</code>。前端控制台运行在 <code>:5173</code>（Ant Design）。</p>
-      <p>如果你已启动前端服务，请点击“打开前端控制台”。如果前端未启动，请先执行 <code>docker compose --profile frontend up --build</code>。</p>
+      <p>如果你已启动前端服务，请点击“打开前端控制台”。如果前端未启动，请先执行 <code>docker compose up --build</code>。</p>
       <div class='row'>
         <a class='btn' href='http://localhost:5173' target='_blank' rel='noreferrer'>打开前端控制台</a>
         <a class='btn secondary' href='/api/v1/auth/me'>查看 API 示例</a>
