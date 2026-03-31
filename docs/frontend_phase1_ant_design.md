@@ -1,27 +1,28 @@
-# Frontend (Ant Design Style) - Phase 1
+# Frontend (Phase 1) - Embedded Console on Django
 
-## Why this version
-In restricted environments, pulling `node:20-alpine` often fails. To ensure frontend can still run with Docker, this phase provides a **no-build static console** served by Python `http.server`.
+## What changed
+To avoid environment/network issues, frontend is now served directly by Django at `http://localhost:8000/`.
 
-## Capabilities
-- Login / JWT token storage
-- `/auth/me`
-- User list
-- Role list
-- User-role binding list
-- Change password
+No extra Node/Vite runtime is required for Phase 1 demo.
+
+## Features on `/`
+- 登录
+- 我的信息 (`/api/v1/auth/me`)
+- 用户管理（列表 + 新建）
+- 角色管理（列表 + 新建）
+- 用户角色绑定（列表 + 新建）
+- 修改密码
 
 ## Run
 ```bash
 docker compose up --build
 ```
 
-- Backend API: `http://localhost:8000`
-- Frontend: `http://localhost:5173`
+Then open:
+- `http://localhost:8000/`
 
-## Access notes
-- `http://localhost:8000/` shows launcher page and frontend link.
-- `http://localhost:5173/` shows interactive frontend console page.
-
-## Implementation note
-Frontend container uses `python:3.12-slim` and serves `frontend/dist` directly, removing Node image dependency.
+## Technical implementation
+- Template: `templates/console.html`
+- Static JS: `static/js/console.js`
+- Static CSS: `static/css/console.css`
+- Root view: `config/views.py`

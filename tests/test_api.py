@@ -105,4 +105,4 @@ class PlatformApiTest(APITestCase):
     def test_root_returns_frontend_landing_page(self):
         resp = self.client.get('/')
         self.assertEqual(resp.status_code, status.HTTP_200_OK)
-        self.assertIn('PTaaS Teams 平台入口', resp.content.decode('utf-8'))
+        self.assertIn('平台基础能力控制台', resp.content.decode('utf-8'))
